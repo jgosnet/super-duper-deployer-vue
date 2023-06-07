@@ -1,9 +1,11 @@
 <template lang="pug">
 v-card
-  v-card-title Push from filesystem
-  v-card-text
-    v-row
-      | {{ selectedProject }}
+  v-card-title
+    v-row(class="py-3")
+      h2 Push from project
+      v-spacer
+      push-to-rally-configuration
+  //v-card-text
     v-row
       v-btn(@click="openAll(this.folders)"
         prepend-icon="fas fa-plus") Expand All
@@ -24,13 +26,17 @@ v-card
 import PusherFolderItem from "@/components/PushToRally/PushFolder/PusherFolderItem";
 import ProjectFolder from "@/components/PushToRally/PushFolder/ProjectFolder";
 import ProjectRoot from "@/components/PushToRally/PushFolder/ProjectRoot";
+import AddSiloConfig from "@/components/Configuration/AddSiloConfig";
+import PushToRallyConfiguration from "@/components/PushToRally/PushToRallyConfiguration";
 
 export default {
   name: "PusherHome",
   components: {
+    PushToRallyConfiguration,
     ProjectRoot,
     ProjectFolder,
-    PusherFolderItem
+    PusherFolderItem,
+    AddSiloConfig
   },
   props: {
     selectedProject: Object
@@ -92,6 +98,10 @@ export default {
 <style scoped>
 .v-card{
   /*border: 2px solid*/
+}
+
+.float-right{
+  text-align: right;
 }
 
 .shifted{

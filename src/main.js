@@ -1,5 +1,8 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import {createRouter, createWebHistory} from "vue-router";
+import { routes } from './router';
+
 
 // Vuetify
 import 'vuetify/styles'
@@ -12,13 +15,13 @@ const vuetify = createVuetify({
   directives,
 })
 
-// import { fas } from '@fortawesome/fontawesome-free-solid';
-// import { fab } from '@fortawesome/fontawesome-free-brands';
-// import { far } from '@fortawesome/fontawesome-free-regular';
-// import * as fontawesome from "@fortawesome/fontawesome-svg-core";
-//
-// fontawesome.library.add(fas, fab, far)
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+});
 
 createApp(App)
   .use(vuetify)
+  .use(router)
   .mount('#app')

@@ -1,10 +1,11 @@
-<template>
-
+<template lang="pug">
+div
+  | Home page
 </template>
 
 <script>
 export default {
-  name: "ProjectPresetItem"
+  name: "CompareHome"
 }
 </script>
 

@@ -4,7 +4,7 @@ v-card(class="w-100" density="compact" )
   div()
     v-card-text
       v-row(v-for="subFolder in folders" :key="subFolder.name" :folder="subFolder")
-        ProjectFolder(:name="subFolder.name"
+        ProjectFolder(:dir_name="subFolder.name"
           :id="subFolder.id"
           :folders="subFolder.folders")
 </template>
