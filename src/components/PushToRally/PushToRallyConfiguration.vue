@@ -12,44 +12,57 @@ v-card
       | {{this.computedProject}}
 
 v-dialog(v-model="localDialog"
-
+      fullscreen
       transition="dialog-top-transition"
       @keyup.esc="closeDialog")
   template(v-slot:activator="{ props }")
   v-card
-    v-toolbar(color="surface-variant")
-      v-toolbar-title Export Configuration
+    v-toolbar(color="light-blue-darken-4")
+      v-toolbar-title
+        v-icon.mx-3 fa-solid fa-gears
+        | Configuration
       v-spacer
       v-toolbar-items
         v-btn(variant="text" @click="closeDialog" icon="fa-solid fa-xmark")
 
-    v-card-text(v-show="this.loading")
-      v-progress-linear(indeterminate
-            color="black"
-            class="mb-0")
-      | Data loading..
-    v-card-text(v-show="!this.loading")
-      v-list
-        v-list-item
-          v-form(validate-on="submit lazy"
-                @submit.prevent="submit")
-            v-text-field() test
-            | 123
-    v-card-actions(v-show="!this.loading")
-      v-spacer
-      v-btn(color="blue-darken-1"
-              variant="text"
-              @click="closeDialog") Close
-      v-btn(color="blue-darken-1"
-          variant="text"
-          @click="closeDialog") Save
+    div(v-show="this.loading")
+      v-card-text(v-show="this.loading")
+        v-progress-linear(indeterminate
+              color="black"
+              class="mb-0")
+        | Data loading..
+    div(v-show="!this.loading")
+      GeneralConfig(:selectedProjects="selectedProjects")
+      //v-card-text(v-show="!this.loading")
+        v-list
+          v-list-item
+            v-form(validate-on="submit lazy"
+                  @submit.prevent="submit")
+              v-text-field() test
+              | 123
+      v-card-actions(v-show="!this.loading")
+        v-spacer
+        v-btn(color="blue-darken-1"
+                variant="text"
+                @click="closeDialog") Close
+        v-btn(color="blue-darken-1"
+            variant="text"
+            @click="closeDialog") Save
 
 </template>
 
 <script>
+import GeneralConfig from "@/components/PushToRally/Forms/GeneralConfig";
+
 export default {
   name: "PushToRallyConfiguration",
+  components: {
+    GeneralConfig,
+  },
   props:{
+    selectedProjects: {
+      type: Array
+    }
   },
   computed: {
     show: {
@@ -72,7 +85,7 @@ export default {
       localSelectedProject: null,
       localSelectedSilo: null,
       localDialog: false,
-      loading: true,
+      loading: false,
       timeout: null,
       availableProjects: [],
     }

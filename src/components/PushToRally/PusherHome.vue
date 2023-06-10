@@ -1,16 +1,24 @@
 <template lang="pug">
 v-card
   v-card-title
-    v-row(class="py-3")
+    v-row.py-3
       h2 Push from project
       v-spacer
-      push-to-rally-configuration
-  //v-card-text
-    v-row
-      v-btn(@click="openAll(this.folders)"
-        prepend-icon="fas fa-plus") Expand All
+      push-to-rally-configuration(:selectedProjects="selectedProjects")
+  v-card-text
+    //v-row
+    //  v-btn(@click="openAll(this.folders)"
+    //    prepend-icon="fas fa-plus") Expand All
     v-row(class="mt-5")
-      ProjectRoot(:name="selectedProject.name" :folders="folders")
+      div(v-if="this.localProjects.length === 0").py-6
+        span(align="center") No projects selected.
+      div(v-else)
+        v-tabs(bg-color="blue-grey-darken-4")
+          v-tab(v-for="project in this.localProjects"  )
+            | {{project}}
+          //ProjectRoot(v-for="project in this.localProjects"
+          //  :key="project.name"
+          //  :name="project.name" :folders="project.folders")
       //ProjectFolder(name="Root/" :folders="folders")
       //PushFolders(:folders="folders")
 
@@ -26,7 +34,6 @@ v-card
 import PusherFolderItem from "@/components/PushToRally/PushFolder/PusherFolderItem";
 import ProjectFolder from "@/components/PushToRally/PushFolder/ProjectFolder";
 import ProjectRoot from "@/components/PushToRally/PushFolder/ProjectRoot";
-import AddSiloConfig from "@/components/Configuration/AddSiloConfig";
 import PushToRallyConfiguration from "@/components/PushToRally/PushToRallyConfiguration";
 
 export default {
@@ -36,14 +43,12 @@ export default {
     ProjectRoot,
     ProjectFolder,
     PusherFolderItem,
-    AddSiloConfig
-  },
-  props: {
-    selectedProject: Object
   },
   data() {
     return {
-      folders: []
+      selectedProjects: [],
+      folders: [],
+      localProjects: ["test", "test2"]
     }
   },
   methods: {

@@ -1,6 +1,6 @@
 <template lang="pug">
 v-card(class="w-100" density="compact" )
-  v-card-title(text-align="left" align="left") {{ name }}
+  v-card-title(text-align="left" align="left") Project: {{ name }}
   div()
     v-card-text
       v-row(v-for="subFolder in folders" :key="subFolder.name" :folder="subFolder")

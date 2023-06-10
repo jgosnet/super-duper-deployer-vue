@@ -21,7 +21,10 @@ const router = createRouter({
   routes
 });
 
+import {store} from "@/store/store";
+
 createApp(App)
   .use(vuetify)
   .use(router)
+  .use(store)
   .mount('#app')

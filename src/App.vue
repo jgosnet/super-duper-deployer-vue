@@ -1,7 +1,9 @@
 <template lang="pug">
 v-card
+  MyCounter
+  HttpRequestsComponent
   v-layout
-    v-app-bar(color="surface-variant" prominent)
+    v-app-bar(color="surface-variant" prominent density="compact" )
       v-menu(transition="slide-y-transition")
         template(v-slot:activator="{ props }")
           v-btn(v-bind="props" icon="fas fa-bars")
@@ -10,16 +12,17 @@ v-card
             :key='item.title'
             :to='item.path'
             :prepend-icon="item.icon"
-            exact-active-class='grey' large
-            @click="setSelectedComponent(item.component)")
+            exact-active-class='grey' large)
             v-list-item-title.item-title {{item.title}}
 
       v-toolbar-title Super Duper Deploy Tool
+      //v-spacer
+      i.pr-4 Beta0.1 (6/6/2023)
 
-    v-main(class="pt-1")
-      keep-alive
-        router-view(v-slot="{ Component }")
-          transition(name="fade" mode="out-in" )
+    v-main.pt-1
+      router-view(v-slot="{ Component }")
+        transition(name="fade" mode="out-in" )
+          keep-alive
             Component(:is="Component")
 
 </template>
@@ -27,20 +30,17 @@ v-card
 <script>
 /* eslint-disable */
 import './assets/main.css'
+import HttpRequestsComponent from "@/components/TestsModules/HttpRequestsComponent";
+import MyCounter from "@/components/TestsModules/MyCounter";
 
 export default {
   name: 'App',
   components: {
+    MyCounter,
+    HttpRequestsComponent
   },
   data() {
     return {
-      selectedComponent: "PusherHome",
-      selectedProject: {
-        name: "test"
-      },
-      siloConfig: {},
-      drawer: true,
-      rail: true,
       menuItems: [
         {title: 'Home', path: '/', icon: 'fas fa-home'},
         {title: 'Push from project', path: '/export', icon: 'fas fa-cloud-upload-alt'},
@@ -50,12 +50,9 @@ export default {
     }
   },
   computed: {
-
   },
   methods: {
-    setSelectedComponent(value) {
-      this.selectedComponent = value
-    }
+
   }
 }
 </script>
@@ -69,7 +66,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 45px;
 }
 
 .default_height {
