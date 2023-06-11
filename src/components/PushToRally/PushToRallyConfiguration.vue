@@ -47,7 +47,7 @@ v-dialog(v-model="localDialog"
                 @click="closeDialog") Close
         v-btn(color="blue-darken-1"
             variant="text"
-            @click="closeDialog") Save
+            @click="saveConfiguration") Save
 
 </template>
 
@@ -103,6 +103,10 @@ export default {
       const results = await event
       this.loading = false
       alert(JSON.stringify(results, null, 2))
+    },
+    saveConfiguration(){
+      console.log('trying to save cookies:')
+      this.$cookies.set('selectedProjects', JSON.stringify(this.$store.getters['configuration/projectsList']))
     }
   }
 }

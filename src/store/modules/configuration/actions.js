@@ -1,5 +1,6 @@
 import {flask_url} from "@/scripts/config";
 import axios from "axios";
+import cookie from 'vue-cookies'
 
 export default {
   increment(context, payload){
@@ -14,25 +15,34 @@ export default {
     // eslint-disable-next-line no-unused-vars
     axios.get(url)
       .then((response) => {
-        console.log("----> " + response.statusText)
         if (response.statusText === 'OK'){
-          console.log("STATUS OK")
-          console.log(response.data)
-          const res = []
-          for (let obj of response.data){
-            console.log("Object is:")
-            console.log(obj)
-            res.push({
-              id: obj.id,
-              name: obj.name,
-              type: obj.project_type,
-              path: obj.local_path,
-              config_type: obj.config_type,
-            })
+          // Following order:
+          // 1\ use cookies to setup array and order
+          // 2\ insert remaining items
+          // update vuex
+          let newProjectsList = []
+          if (cookie.isKey('selectedProjects')){
+            const cachedProjectsList = JSON.parse(JSON.stringify(cookie.get('selectedProjects')));
+            for (const cachedProject of cachedProjectsList){
+              const filteredArray = context.state.projectsList.filter((project) => cachedProject.id == project.id);
+              if (filteredArray.length > 0){
+                newProjectsList.push(cachedProject)
+              }
+            }
           }
-          console.log("finished")
-          console.log(res)
-          context.commit('updateProjectsList', res)
+          for (let obj of response.data){
+            const filteredArray = newProjectsList.filter((project) => project.id == obj.id);
+            if (filteredArray.length === 0){
+              newProjectsList.push({
+                id: obj.id,
+                name: obj.name,
+                type: obj.project_type,
+                path: obj.local_path,
+                config_type: obj.config_type,
+              })
+            }
+          }
+          context.commit('updateProjectsList', newProjectsList)
           return response.data
         }
         console.log(response.data)

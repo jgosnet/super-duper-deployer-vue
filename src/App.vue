@@ -88,5 +88,11 @@ export default {
   opacity: 0;
 }
 
+input[type=checkbox]{
+     margin: 4px 0 0;
+    line-height: normal;
+    width: 20px;
+    height: 20px;
+}
 
 </style>
