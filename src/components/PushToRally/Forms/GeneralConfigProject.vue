@@ -1,5 +1,4 @@
 <template lang="pug">
-| {{selectedProjects}}
 v-row.my-3.mx-2
   h2 Projects
     v-btn.ml-3(icon="fas fa-plus")
@@ -44,15 +43,14 @@ export default {
   components: {
     draggable
   },
-  inject: ['localSelectedProjects'],
   data(){
     return {
-      errorMessage: "",
-      isLoading: false
+      isLoading: false,
+      localSelectedProjects: this.selectedProjectNames,
     }
   },
   computed: {
-    ...mapGetters('configuration', ['selectedProjects']),
+    ...mapGetters('configuration', ['selectedProjectNames', 'errorMessage']),
     projectList: {
       get(){
         console.log(this.$store.getters['configuration/projectsList'])
@@ -64,11 +62,8 @@ export default {
     }
   },
   methods:{
-    loadProjectsList(){
+    loadProjectsList() {
       this.$store.dispatch('configuration/loadProjectsList');
-    },
-    submit(){
-      console.log("submitted the form")
     }
   },
   watch:{
@@ -80,7 +75,6 @@ export default {
     }
   },
   mounted() {
-    this.$store.dispatch('configuration/loadProjectsList');
   }
 }
 </script>

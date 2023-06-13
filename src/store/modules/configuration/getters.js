@@ -5,19 +5,26 @@ export default {
   projectsList(state){
     return state.projectsList
   },
-  selectedProjects(state){
+  selectedProjectNames(state, getters){
     const selectedProjectNames = []
-    for (const projectObj of state.projectsList){
-      if (projectObj.isSelected){
-        selectedProjectNames.push(projectObj.name)
-      }
+    for (const projectObj of getters.selectedProjects){
+      selectedProjectNames.push(projectObj.name)
     }
     return selectedProjectNames
+  },
+  selectedProjects(state){
+    const selectedProjects = []
+    for (const projectObj of state.projectsList){
+      if (projectObj.isSelected){
+        selectedProjects.push(projectObj)
+      }
+    }
+    return selectedProjects
   },
   silosList(state){
     return state.silosList
   },
-  selectedSilos(state){
+  selectedSiloNames(state){
     const selectedSiloNames = []
     for (const siloObj of state.silosList){
       if (siloObj.isSelected){
@@ -25,5 +32,17 @@ export default {
       }
     }
     return selectedSiloNames
+  },
+  selectedSilos(state){
+    const selectedSilos = []
+    for (const siloObj of state.silosList){
+      if (siloObj.isSelected){
+        selectedSilos.push(siloObj)
+      }
+    }
+    return selectedSilos
+  },
+  errorMessage(state){
+    return state.errorMessage
   }
 }

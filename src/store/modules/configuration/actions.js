@@ -2,17 +2,15 @@ import {flask_url} from "@/scripts/config";
 import axios from "axios";
 import cookie from 'vue-cookies'
 
+
 export default {
   increment(context, payload){
     context.commit('increment', payload)
   },
-  loadProjectsList(context) {
-    console.log('started')
-    // eslint-disable-next-line no-unused-vars
+  async loadProjectsList(context) {
     const url = `${flask_url}/config/project`
     this.isLoading = true
-    this.errorMessage = ""
-    // eslint-disable-next-line no-unused-vars
+    context.commit('updateErrorMessage', "")
     axios.get(url)
       .then((response) => {
         if (response.statusText === 'OK'){
@@ -21,15 +19,20 @@ export default {
           // 2\ insert remaining items
           // update vuex
           let newProjectsList = []
+          console.log(`getting projects list..`)
           if (cookie.isKey('selectedProjects')){
+            console.log(`Cookies found for: selectedProjects`)
             const cachedProjectsList = JSON.parse(JSON.stringify(cookie.get('selectedProjects')));
+            console.log(cachedProjectsList)
             for (const cachedProject of cachedProjectsList){
-              const filteredArray = context.state.projectsList.filter((project) => cachedProject.id == project.id);
+              const filteredArray = response.data.filter((project) => cachedProject.id == project.id);
               if (filteredArray.length > 0){
                 newProjectsList.push(cachedProject)
               }
             }
           }
+          console.log(`Cached projects loaded: `)
+          console.log(newProjectsList)
           for (let obj of response.data){
             const filteredArray = newProjectsList.filter((project) => project.id == obj.id);
             if (filteredArray.length === 0){
@@ -49,12 +52,21 @@ export default {
       })
       .catch((error) => {
         console.log(error)
-        // this.errorMessage = "Failed to fetch data from the server"
+        const errorMessage = 'Failed to get the project list from server'
+        context.dispatch('snackbar/showMessage', {
+            message: errorMessage
+          },
+          { root: true }
+        )
+        context.commit('updateErrorMessage', errorMessage)
       })
       .finally(() => {
       })
   },
   updateProjectsList(context, payload){
     context.commit('updateProjectsList', payload)
+  },
+  updateErrorMessage(context, errorMessage){
+    context.commit('updateErrorMessage', errorMessage)
   }
 }

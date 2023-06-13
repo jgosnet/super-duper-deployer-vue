@@ -5,13 +5,19 @@ v-card
     v-btn(@click.stop="openDialog" icon="fas fa-edit" size="small" variant="outlined" align="left")
   v-card-text
     v-row(text-align="left")
-      b(class="pr-2") Selected Silo:
-      | {{this.computedSilo}}
+      b(class="pr-2") Silos:
+      ul.ml-4
+        li(v-for="silo in selectedSiloNames" :key="silo")
+          | {{silo}}
     v-row(text-align="left")
-      b(class="pr-2") Selected Project:
-      | {{this.computedProject}}
+      b(class="pr-2") Projects:
+      ul.ml-4
+        li(v-for="project in selectedProjectNames" :key="project")
+          | {{project}}
+
 
 v-dialog(v-model="localDialog"
+      persistent
       fullscreen
       transition="dialog-top-transition"
       @keyup.esc="closeDialog")
@@ -32,7 +38,7 @@ v-dialog(v-model="localDialog"
               class="mb-0")
         | Data loading..
     div(v-show="!this.loading")
-      GeneralConfig(:selectedProjects="selectedProjects")
+      GeneralConfig()
       //v-card-text(v-show="!this.loading")
         v-list
           v-list-item
@@ -53,6 +59,7 @@ v-dialog(v-model="localDialog"
 
 <script>
 import GeneralConfig from "@/components/PushToRally/Forms/GeneralConfig";
+import {mapGetters} from "vuex";
 
 export default {
   name: "PushToRallyConfiguration",
@@ -60,11 +67,9 @@ export default {
     GeneralConfig,
   },
   props:{
-    selectedProjects: {
-      type: Array
-    }
   },
   computed: {
+    ...mapGetters('configuration', ['selectedProjectNames', 'selectedSiloNames']),
     show: {
       get() {
         return this.dialog
@@ -107,6 +112,11 @@ export default {
     saveConfiguration(){
       console.log('trying to save cookies:')
       this.$cookies.set('selectedProjects', JSON.stringify(this.$store.getters['configuration/projectsList']))
+      this.$store.dispatch('snackbar/showMessage', {
+            message: "Configuration saved"
+          }
+        )
+      this.closeDialog()
     }
   }
 }

@@ -4,37 +4,34 @@ v-card
     v-row.py-3
       h2 Push from project
       v-spacer
-      push-to-rally-configuration(:selectedProjects="selectedProjects")
-  v-card-text
+      push-to-rally-configuration
+  v-card-text.w-100
     //v-row
     //  v-btn(@click="openAll(this.folders)"
     //    prepend-icon="fas fa-plus") Expand All
-    v-row(class="mt-5")
-      div(v-if="this.localProjects.length === 0").py-6
-        span(align="center") No projects selected.
-      div(v-else)
-        v-tabs(bg-color="blue-grey-darken-4")
-          v-tab(v-for="project in this.localProjects"  )
-            | {{project}}
-          //ProjectRoot(v-for="project in this.localProjects"
-          //  :key="project.name"
-          //  :name="project.name" :folders="project.folders")
-      //ProjectFolder(name="Root/" :folders="folders")
-      //PushFolders(:folders="folders")
 
-      //v-expansion-panels(multiple)
-      //  //| folders are: {{folders }}
-      //  p(v-for="subFolder in this.folders" :key="subFolder.name" :folder="subFolder")
-      //    | {{subFolder}}
-      //    v-divider
-      //  PusherFolderItem(v-for="subFolder in this.folders" :key="subFolder.name" :folder="subFolder")
+    div(v-if="selectedProjects.length === 0").py-6
+      span(align="center") No projects selected.
+    div(v-else)
+      v-card.w-100
+        v-tabs(v-model="tab" bg-color="blue-grey-darken-4")
+          v-tab(v-for="project in selectedProjects" :value="project.id")
+            | {{ project.name}}
+      v-card-text(fluid).ma-0.pa-0
+        v-window(v-model="tab" fluid)
+          v-window-item(v-for="project in selectedProjects"
+            :key="project.id"
+            :value="project.id")
+            keep-alive
+              ProjectRoot(:project="project")
+
 </template>
 
 <script>
-import PusherFolderItem from "@/components/PushToRally/PushFolder/PusherFolderItem";
 import ProjectFolder from "@/components/PushToRally/PushFolder/ProjectFolder";
 import ProjectRoot from "@/components/PushToRally/PushFolder/ProjectRoot";
 import PushToRallyConfiguration from "@/components/PushToRally/PushToRallyConfiguration";
+import {mapGetters} from "vuex";
 
 export default {
   name: "PusherHome",
@@ -42,14 +39,16 @@ export default {
     PushToRallyConfiguration,
     ProjectRoot,
     ProjectFolder,
-    PusherFolderItem,
   },
   data() {
     return {
-      selectedProjects: [],
+      tab: null,
       folders: [],
       localProjects: ["test", "test2"]
     }
+  },
+  computed:{
+    ...mapGetters('configuration', ['selectedProjects']),
   },
   methods: {
     openAll(current_folders){

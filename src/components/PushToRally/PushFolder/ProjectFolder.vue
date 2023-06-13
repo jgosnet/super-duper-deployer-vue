@@ -1,14 +1,17 @@
 <template lang="pug">
-v-card(class="w-100 mb-2"
+v-card.my-0.py-0(class="w-100 mb-0"
   density="compact"
   height="50%"
-  elevation="3")
-  v-card-actions
+  elevation="0")
+  v-card-actions.py-0
     v-btn(class="text-right"
-      :icon="this.localShow ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-down'"
+      :icon="this.localShow ? 'fas fa-minus' : 'fas fa-plus'"
       @click="toggle_folder")
     v-divider(vertical)
-    v-btn(@click="toggle_folder") {{ dir_name }}
+    v-btn(@click="toggle_folder") {{ this.dir_name }}
+    v-spacer
+    slot(name="refreshButton")
+
 
   v-expand-transition
     div(v-show="localShow")
@@ -17,10 +20,10 @@ v-card(class="w-100 mb-2"
         ProjectPresets
       v-divider
       v-card-text
-        v-row(v-for="subFolder in folders" :key="subFolder.name" :folder="subFolder")
-          ProjectFolder(:dir_name="subFolder.name"
+        v-row(v-for="subFolder in folders" :key="dir_name + subFolder.name" :folder="subFolder")
+          ProjectFolder(:dir_name="subFolder.dir_name"
             :folders="subFolder.folders"
-            :id="subFolder.id"
+            :id="'project' + dir_name + subFolder.name"
             class="ml-10")
 
 
@@ -34,7 +37,7 @@ export default {
   components: {ProjectPresets},
   props: {
     show: Boolean,
-    folders: Object,
+    folders: Array,
     dir_name: String,
     id: String
   },

@@ -1,7 +1,6 @@
 <template lang="pug">
 v-card
-  MyCounter
-  HttpRequestsComponent
+  SnackBarPopup
   v-layout
     v-app-bar(color="surface-variant" prominent density="compact" )
       v-menu(transition="slide-y-transition")
@@ -30,14 +29,12 @@ v-card
 <script>
 /* eslint-disable */
 import './assets/main.css'
-import HttpRequestsComponent from "@/components/TestsModules/HttpRequestsComponent";
-import MyCounter from "@/components/TestsModules/MyCounter";
+import SnackBarPopup from "@/components/utils/SnackBarPopup";
 
 export default {
   name: 'App',
   components: {
-    MyCounter,
-    HttpRequestsComponent
+    SnackBarPopup
   },
   data() {
     return {
@@ -52,7 +49,12 @@ export default {
   computed: {
   },
   methods: {
-
+    openSnackbar(){
+      this.snackbar = true
+    }
+  },
+  mounted() {
+    this.$store.dispatch('configuration/loadProjectsList');
   }
 }
 </script>

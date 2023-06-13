@@ -21,9 +21,6 @@ export default {
     GeneralConfigProject,
   },
   props: {
-    selectedProjects: {
-      type: Array
-    }
   },
   data(){
     return {
