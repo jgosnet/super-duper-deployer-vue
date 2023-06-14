@@ -68,5 +68,125 @@ export default {
   },
   updateErrorMessage(context, errorMessage){
     context.commit('updateErrorMessage', errorMessage)
+  },
+  async deleteProject(context, projectId){
+    const url = `${flask_url}/config/project/${projectId}`
+    this.isLoading = true
+    axios.delete(url)
+      .then((response) => {
+        if (response.statusText === 'OK'){
+          context.dispatch('loadProjectsList')
+          return
+        }
+        console.log(response.data)
+      })
+      .catch((error) => {
+        console.log(error)
+        const errorMessage = `Failed to delete the project: ${projectId}`
+        context.dispatch('snackbar/showMessage', {
+            message: errorMessage
+          },
+          { root: true }
+        )
+        // context.commit('updateErrorMessage', errorMessage)
+      })
+      .finally(() => {
+      })
+  },
+  updateSiloErrorMessage(context, errorMessage){
+    context.commit('updateSiloErrorMessage', errorMessage)
+  },
+  // SILOS Actions
+  async loadSilosList(context) {
+    const url = `${flask_url}/config/silo`
+    this.isLoading = true
+    context.commit('updateSiloErrorMessage', "")
+    axios.get(url)
+      .then((response) => {
+        if (response.statusText === 'OK'){
+          let newSilosList = []
+          console.log(`getting silos list..`)
+          if (cookie.isKey('selectedSilos')){
+            console.log(`Cookies found for: selectedSilos`)
+            const cachedSilosList = JSON.parse(JSON.stringify(cookie.get('selectedSilos')));
+            console.log(cachedSilosList)
+            for (const cachedSilo of cachedSilosList){
+              const filteredArray = response.data.filter((project) => cachedSilo.id == project.id);
+              if (filteredArray.length > 0){
+                newSilosList.push(cachedSilo)
+              }
+            }
+          }
+          console.log(`Cached silos loaded: `)
+          console.log(newSilosList)
+          for (let obj of response.data){
+            const filteredArray = newSilosList.filter((silo) => silo.name == obj.name);
+            if (filteredArray.length === 0){
+              newSilosList.push({
+                id: obj.id,
+                name: obj.name
+              })
+            }
+          }
+          context.commit('updateSilosList', newSilosList)
+          return response.data
+        }
+        console.log(response.data)
+      })
+      .catch((error) => {
+        console.log(error)
+        const errorMessage = 'Failed to get the silo list from server'
+        context.dispatch('snackbar/showMessage', {
+            message: errorMessage
+          },
+          { root: true }
+        )
+        context.commit('updateSiloErrorMessage', errorMessage)
+      })
+      .finally(() => {
+      })
+  },
+  updateSilosList(context, payload){
+    context.commit('updateSilosList', payload)
+  },
+  async deleteSilo(context, siloId){
+    const url = `${flask_url}/config/silo/${siloId}`
+    this.isLoading = true
+    axios.delete(url)
+      .then((response) => {
+        if (response.statusText === 'OK'){
+          context.dispatch('loadSilosList')
+          return
+        }
+        console.log(response.data)
+      })
+      .catch((error) => {
+        console.log(error)
+        const errorMessage = `Failed to delete the silo: ${siloId}`
+        context.dispatch('snackbar/showMessage', {
+            message: errorMessage
+          },
+          { root: true }
+        )
+        // context.commit('updateErrorMessage', errorMessage)
+      })
+      .finally(() => {
+      })
+  },
+  updateDefaultImportPath(context, path){
+    context.commit('updateDefaultImportPath', path)
+  },
+  loadDefaultImportPath(context){
+    if (cookie.isKey('defaultImportPath')){
+      console.log(`Cookies found for: defaultImportPath`)
+      const cachedDefaultImportPath = JSON.parse(JSON.stringify(cookie.get('defaultImportPath')));
+      console.log(cachedDefaultImportPath);
+      context.dispatch('updateDefaultImportPath', cachedDefaultImportPath);
+    }
+  },
+  async loadConfiguration(context){
+    context.dispatch('loadProjectsList');
+    context.dispatch('loadSilosList');
+    context.dispatch('loadDefaultImportPath');
   }
 }

@@ -7,5 +7,14 @@ export default {
   },
   updateErrorMessage(state, errorMessage){
     state.errorMessage = errorMessage
-  }
+  },
+  updateSilosList(state, newSilosList){
+    state.silosList = newSilosList
+  },
+  updateSiloErrorMessage(state, errorMessage){
+    state.siloErrorMessage = errorMessage
+  },
+  updateDefaultImportPath(state, path){
+    state.defaultImportPath = path
+  },
 }

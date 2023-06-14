@@ -27,7 +27,7 @@ v-dialog(v-model="dialog"
 import {mapGetters} from "vuex";
 
 export default {
-  name: "NewProjectForm",
+  name: "NewSiloForm",
   data(){
     return {
       dialog: false,
@@ -48,9 +48,9 @@ export default {
 
     },
     filepathExists(value){
-      for (const project of this.$store.getters['configuration/selectedProjects']){
-        console.log(project.path)
-        if (project.path === value){
+      for (const silo of this.$store.getters['configuration/selectedSilos']){
+        console.log(silo.name)
+        if (silo.name === value){
           return true
         }
       }

@@ -43,6 +43,12 @@ export default {
     return selectedSilos
   },
   errorMessage(state){
-    return state.errorMessage
+    return state.projectErrorMessage
+  },
+  siloErrorMessage(state){
+    return state.siloErrorMessage
+  },
+  defaultImportPath(state){
+    return state.defaultImportPath
   }
 }

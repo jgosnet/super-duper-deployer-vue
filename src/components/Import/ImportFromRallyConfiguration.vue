@@ -9,12 +9,6 @@ v-card
       ul.ml-4
         li(v-for="silo in selectedSiloNames" :key="silo")
           | {{silo}}
-    v-row(text-align="left")
-      b(class="pr-2") Projects:
-      ul.ml-4
-        li(v-for="project in selectedProjectNames" :key="project")
-          | {{project}}
-
 
 v-dialog(v-model="localDialog"
       persistent
@@ -38,14 +32,8 @@ v-dialog(v-model="localDialog"
               class="mb-0")
         | Data loading..
     div(v-show="!this.loading")
-      GeneralConfig()
-      //v-card-text(v-show="!this.loading")
-        v-list
-          v-list-item
-            v-form(validate-on="submit lazy"
-                  @submit.prevent="submit")
-              v-text-field() test
-              | 123
+      ImportConfigDetails
+
       v-card-actions(v-show="!this.loading")
         v-spacer
         v-btn(color="blue-darken-1"
@@ -58,15 +46,13 @@ v-dialog(v-model="localDialog"
 </template>
 
 <script>
-import GeneralConfig from "@/components/PushToRally/Forms/GeneralConfig";
 import {mapGetters} from "vuex";
+import ImportConfigDetails from "@/components/Import/ImportConfigDetails";
 
 export default {
-  name: "PushToRallyConfiguration",
+  name: "ImportFromRallyConfiguration",
   components: {
-    GeneralConfig,
-  },
-  props:{
+    ImportConfigDetails
   },
   computed: {
     ...mapGetters('configuration', ['selectedProjectNames', 'selectedSiloNames']),
@@ -111,8 +97,9 @@ export default {
     },
     saveConfiguration(){
       console.log('trying to save cookies:')
-      this.$cookies.set('selectedProjects', JSON.stringify(this.$store.getters['configuration/projectsList']))
-      this.$cookies.set('selectedSilos', JSON.stringify(this.$store.getters['configuration/selectedSilos']))
+      this.$cookies.set('selectedProjects', JSON.stringify(this.$store.getters['configuration/projectsList']));
+      this.$cookies.set('selectedSilos', JSON.stringify(this.$store.getters['configuration/selectedSilos']));
+      this.$cookies.set('defaultImportPath', this.$store.getters['configuration/defaultImportPath']);
       this.$store.dispatch('snackbar/showMessage', {
             message: "Configuration saved"
           }

@@ -1,5 +1,5 @@
 <template lang="pug">
-v-card
+v-card(color="transparent" elevation="0" )
   SnackBarPopup
   v-layout
     v-app-bar(color="surface-variant" prominent density="compact" )
@@ -54,14 +54,19 @@ export default {
     }
   },
   mounted() {
-    this.$store.dispatch('configuration/loadProjectsList');
+    this.$store.dispatch('configuration/loadConfiguration');
   }
 }
 </script>
 
 <style>
 
-
+body{
+        background-image: url('/src/assets/background-2462431_1920.jpg') !important;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+}
 #app {
   font-family: Roboto;
   -webkit-font-smoothing: antialiased;
@@ -69,6 +74,8 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 45px;
+
+
 }
 
 .default_height {

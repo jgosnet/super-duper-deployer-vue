@@ -7,9 +7,10 @@ v-card.w-100(density="compact" ).ma-0.pa-0
     //v-btn.my-4(@click="loadProjectStructure" align="left" text-align="left") refresh
     v-row(v-for="subFolder in folders" :key="subFolder.dir_name" :folder="subFolder")
       ProjectFolder.pt-3.float-left.my-0(:dir_name="subFolder.dir_name"
-        :id="subFolder.dir_name"
+        :id="subFolder.dir_name  + 'project'"
         :folders="subFolder.folders"
-        show="true")
+        folder_path=""
+        show=true)
         template(#refreshButton)
           v-btn(@click="loadProjectStructure"
             icon="fa-solid fa-arrows-rotate").float-right

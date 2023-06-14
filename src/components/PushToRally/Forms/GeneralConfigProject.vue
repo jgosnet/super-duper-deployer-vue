@@ -1,10 +1,10 @@
 <template lang="pug">
 v-row.my-3.mx-2
   h2 Projects
-    v-btn.ml-3(icon="fas fa-plus")
+    NewProjectForm
   v-spacer
   v-btn.ml-3(icon="fa-solid fa-arrows-rotate" size="small" @click="loadProjectsList")
-
+ConfirmDialog(ref="confirmDialogue")
 v-row
   v-col(cols="12")
     div(v-if="this.isLoading" )
@@ -18,18 +18,28 @@ v-row
         item-key="id"
         group="project")
         template(#item="{element}")
-          v-card
+          v-card(elevation="3" ).my-2
             v-card-title
               v-icon.mr-3(size="x-small" ) fa-solid fa-bars
               | {{element.name}} ({{element.id}})
+              v-icon.ml-5(size="x-small" icon="far fa-trash-alt" @click="deleteProject(element)")
+
               input(type="checkbox" v-model="element.isSelected").float-right
-              //v-checkbox(v-model="element.isSelected" label="" )
 
             v-card-text
-              v-row
-                | {{element.type}}
-                br
-                | {{element.path}}
+              v-row.pt-2.px-5
+                span.font-weight-bold Type:
+                span.font-weight-medium.pl-2 {{element.type}}
+              v-row.pt-2.px-5(v-if="element.type=='local'" )
+                span.font-weight-bold Path:
+                span.font-weight-medium.pl-2 {{element.path}}
+              div(v-if="element.type=='github'")
+                v-row.pt-2.px-5
+                  span.font-weight-bold Repo:
+                  span.font-weight-medium.pl-2 {{element.repo}}
+                v-row.pt-2.px-5
+                  span.font-weight-bold Branch:
+                  span.font-weight-medium.pl-2 {{element.branch}}
 
 
 </template>
@@ -37,10 +47,14 @@ v-row
 <script>
 import draggable from "vuedraggable";
 import {mapGetters} from "vuex";
+import ConfirmDialog from "@/components/utils/ConfirmDialog";
+import NewProjectForm from "@/components/PushToRally/Forms/Project/NewProjectForm";
 
 export default {
   name: "GeneralConfigProject",
   components: {
+    NewProjectForm,
+    ConfirmDialog,
     draggable
   },
   data(){
@@ -64,15 +78,23 @@ export default {
   methods:{
     loadProjectsList() {
       this.$store.dispatch('configuration/loadProjectsList');
-    }
+    },
+    async deleteProject(project) {
+      const ok = await this.$refs.confirmDialogue.show({
+          title: 'Delete Page',
+          message: `Are you sure you want to delete this project ? [${project.name}
+          (id: ${project.id})]`,
+      })
+      // If you throw an error, the method will terminate here unless you surround it wil try/catch
+      if (ok) {
+        console.log('Trying to delete this project')
+        this.$store.dispatch('configuration/deleteProject', project.id);
+      } else {
+        console.log('You chose not to delete this page. Doing nothing now.')
+      }
+    },
   },
   watch:{
-    projectsList(newValue){
-      console.log('found new value for projects list')
-      console.log(newValue)
-      this.localSelectedProjects = newValue
-      console.log(this.localSelectedProjects)
-    }
   },
   mounted() {
   }

@@ -8,7 +8,7 @@ v-card.my-0.py-0(class="w-100 mb-0"
       :icon="this.localShow ? 'fas fa-minus' : 'fas fa-plus'"
       @click="toggle_folder")
     v-divider(vertical)
-    v-btn(@click="toggle_folder") {{ this.dir_name }}
+    span(@click="toggle_folder" big).pl-3.text-uppercase {{ this.dir_name }}
     v-spacer
     slot(name="refreshButton")
 
@@ -16,14 +16,15 @@ v-card.my-0.py-0(class="w-100 mb-0"
   v-expand-transition
     div(v-show="localShow")
       v-divider
-      v-row(v-if="dir_name == 'presets'")
-        ProjectPresets
+      v-row(v-if="dir_name == 'presets'").w-100
+        ProjectPresets.w-100
       v-divider
       v-card-text
         v-row(v-for="subFolder in folders" :key="dir_name + subFolder.name" :folder="subFolder")
           ProjectFolder(:dir_name="subFolder.dir_name"
             :folders="subFolder.folders"
-            :id="'project' + dir_name + subFolder.name"
+            :id="folder_path + '/' + subFolder.dir_name + 'project'"
+            :folder_path="folder_path + '/' + subFolder.dir_name"
             class="ml-10")
 
 
@@ -39,7 +40,8 @@ export default {
     show: Boolean,
     folders: Array,
     dir_name: String,
-    id: String
+    id: String,
+    folder_path: String
   },
   data(){
     return {

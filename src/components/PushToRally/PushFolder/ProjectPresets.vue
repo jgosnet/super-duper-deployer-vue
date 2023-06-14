@@ -1,5 +1,5 @@
 <template lang="pug">
-v-container(class="mx-1")
+v-container(class="mx-1" fluid)
   v-data-table(
     v-model:items-per-page="itemsPerPage"
     :headers="presetHeaders"
@@ -8,6 +8,7 @@ v-container(class="mx-1")
     class="elevation-1"
     density="compact"
     :item-class="presetInSiloClass"
+    color="grey-lighten-4"
   )
     template(v-slot:item.existsInSilo="{ item }")
       v-icon {{ item.existsInSilo ? "fa-solid fa-check" : "fa-solid fa-xmark" }}

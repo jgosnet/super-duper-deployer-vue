@@ -1,8 +1,10 @@
 <template lang="pug">
-v-card
+v-card(color="transparent")
   v-card-title
     v-row.py-3
-      h2 Push from project
+      v-icon.ml-4(icon="fas fa-cloud-upload-alt")
+      h2.ml-4 Push from project
+
       v-spacer
       push-to-rally-configuration
   v-card-text.w-100
@@ -61,40 +63,6 @@ export default {
   },
   mounted() {
     console.log("hello")
-    this.folders = [
-        {
-          name: "test1",
-          expand:[0,1],
-          folders: [
-            {
-              name: "presets",
-              expand:false,
-              folders: [
-                {
-                  name: "sub-subfolder1",
-                  expand:false,
-                  folders: []
-                },
-                {
-                  name: "sub-subfolder2",
-                  expand:false,
-                  folders: []
-                }
-              ]
-            },
-            {
-              name: "subfolder2",
-              expand:false,
-              folders: []
-            }
-          ]
-        },
-        {
-          name: "test2",
-          expand:false,
-          folders: []
-        }
-      ]
   }
 }
 </script>
