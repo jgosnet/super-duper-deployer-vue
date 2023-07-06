@@ -8,12 +8,12 @@ v-card
       b(class="pr-2") Silos:
       ul.ml-4
         li(v-for="silo in selectedSiloNames" :key="silo")
-          | {{silo}}
+          span.float-left {{silo}}
     v-row(text-align="left")
       b(class="pr-2") Projects:
       ul.ml-4
         li(v-for="project in selectedProjectNames" :key="project")
-          | {{project}}
+          span.float-left {{project}}
 
 
 v-dialog(v-model="localDialog"

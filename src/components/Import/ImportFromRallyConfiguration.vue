@@ -103,8 +103,8 @@ export default {
       this.$store.dispatch('snackbar/showMessage', {
             message: "Configuration saved"
           }
-        )
-      this.closeDialog()
+        );
+      this.closeDialog();
     }
   }
 }

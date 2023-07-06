@@ -2,15 +2,17 @@
 v-btn.ml-3(icon="fas fa-plus" @click="dialog = true")
 v-dialog(v-model="dialog"
       transition="dialog-top-transition"
-      @keyup.esc="closeDialog"
       width="auto"
       min-width="500" )
   template(v-slot:activator="{ props }")
   v-card
     v-card-title Add new project
     v-card-text
-      v-form.mt-0(validate-on="submit lazy"
-                        @submit.prevent="submit")
+      v-form.mt-0(@submit.prevent="submit"
+                        v-model="isFormValid")
+        v-text-field(label="Name"
+          v-model="name"
+          :rules="nameRules")
         v-select(v-model="projectType"
           :items="possibleProjectTypes"
           label="Project Type")
@@ -18,8 +20,10 @@ v-dialog(v-model="dialog"
           label="Filepath"
           :rules="filepathRules"
           v-model="filepath")
-        v-text-field(label="test")
-        v-btn(type="submit" block) Create
+        v-btn(type="submit"
+          block
+          :disabled="!isFormValid"
+          variant="outlined") Create
 
 </template>
 
@@ -31,6 +35,12 @@ export default {
   data(){
     return {
       dialog: false,
+      isFormValid: false,
+      name: "",
+      nameRules: [
+          v => !!v || 'Name is required',
+          v => !this.nameExists(v) || 'Name already used by another project',
+      ],
       projectType: "local",
       possibleProjectTypes: ["local", "github"],
       filepath: "",
@@ -45,12 +55,27 @@ export default {
   },
   methods: {
     submit(){
-
+      console.log(`STATUS OF VALIDATION: ${this.isFormValid}`)
+      var payload = {
+        name: this.name,
+        project_type: this.projectType,
+        local_path: this.filepath
+      }
+      this.$store.dispatch('configuration/addNewProject', payload)
     },
     filepathExists(value){
       for (const project of this.$store.getters['configuration/selectedProjects']){
         console.log(project.path)
         if (project.path === value){
+          return true
+        }
+      }
+      return false
+    },
+    nameExists(value){
+      for (const project of this.$store.getters['configuration/selectedProjects']){
+        console.log(project.name)
+        if (project.name === value){
           return true
         }
       }

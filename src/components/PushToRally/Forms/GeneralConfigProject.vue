@@ -16,17 +16,27 @@ v-row
     div(v-else)
       draggable(v-model="projectList"
         item-key="id"
-        group="project")
+        group="project"
+        handle=".handle"
+        animation="150"
+        ghost-class="sortable-ghost"
+        fallback-class="fallbackStyleClass"
+        :force-fallback="true")
         template(#item="{element}")
-          v-card(elevation="3" ).my-2
+          v-card(elevation="3").my-2
             v-card-title
-              v-icon.mr-3(size="x-small" ) fa-solid fa-bars
-              | {{element.name}} ({{element.id}})
+              v-icon.handle.mr-3(
+                size="x-small"
+                ) fa-solid fa-bars
+              | {{element.name}}
               v-icon.ml-5(size="x-small" icon="far fa-trash-alt" @click="deleteProject(element)")
 
               input(type="checkbox" v-model="element.isSelected").float-right
 
             v-card-text
+              v-row.pt-2.px-5
+                span.font-weight-bold ID:
+                span.font-weight-medium.pl-2 {{element.id}}
               v-row.pt-2.px-5
                 span.font-weight-bold Type:
                 span.font-weight-medium.pl-2 {{element.type}}
@@ -40,6 +50,8 @@ v-row
                 v-row.pt-2.px-5
                   span.font-weight-bold Branch:
                   span.font-weight-medium.pl-2 {{element.branch}}
+
+
 
 
 </template>
@@ -73,7 +85,7 @@ export default {
       set(value){
         this.$store.dispatch('configuration/updateProjectsList', value)
       }
-    }
+    },
   },
   methods:{
     loadProjectsList() {
@@ -102,5 +114,14 @@ export default {
 </script>
 
 <style scoped>
+.sortable-ghost {
+  opacity: 20%;
+  border: 1px dashed grey;
+  font-size: 0;
+  overflow: hidden;
+}
 
+.fallbackStyleClass{
+  opacity: 70%;
+}
 </style>

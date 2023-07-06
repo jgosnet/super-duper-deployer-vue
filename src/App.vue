@@ -1,5 +1,6 @@
 <template lang="pug">
 v-card(color="transparent" elevation="0" )
+  //PresetDiffView
   SnackBarPopup
   v-layout
     v-app-bar(color="surface-variant" prominent density="compact" )
@@ -30,10 +31,12 @@ v-card(color="transparent" elevation="0" )
 /* eslint-disable */
 import './assets/main.css'
 import SnackBarPopup from "@/components/utils/SnackBarPopup";
+import PresetDiffView from "@/components/Compare/PresetDiffView";
 
 export default {
   name: 'App',
   components: {
+    PresetDiffView,
     SnackBarPopup
   },
   data() {
@@ -54,6 +57,7 @@ export default {
     }
   },
   mounted() {
+    console.log('loading!')
     this.$store.dispatch('configuration/loadConfiguration');
   }
 }

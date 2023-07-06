@@ -2,24 +2,33 @@
 v-btn.ml-3(icon="fas fa-plus" @click="dialog = true")
 v-dialog(v-model="dialog"
       transition="dialog-top-transition"
-      @keyup.esc="closeDialog"
       width="auto"
       min-width="500" )
   template(v-slot:activator="{ props }")
   v-card
-    v-card-title Add new project
+    v-card-title Add new Silo
     v-card-text
-      v-form.mt-0(validate-on="submit lazy"
-                        @submit.prevent="submit")
-        v-select(v-model="projectType"
-          :items="possibleProjectTypes"
-          label="Project Type")
-        v-text-field(v-show="projectType == 'local'"
-          label="Filepath"
-          :rules="filepathRules"
-          v-model="filepath")
-        v-text-field(label="test")
-        v-btn(type="submit" block) Create
+      v-form.mt-0(@submit.prevent="submit"
+                        v-model="isFormValid")
+        v-text-field(label="Name"
+          :rules="siloNameRules"
+          v-model="siloname")
+        v-text-field(label="Customer"
+          v-model="customer")
+        v-text-field(label="Base URL"
+          hint="ex: staging.sdvi.com"
+          v-model="baseUrl"
+          :rules="baseUrlRules")
+        v-text-field(label="Token"
+          :append-icon="showToken ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"
+          v-model="token"
+          :type="showToken ? 'text' : 'password'"
+          @click:append="showToken = !showToken")
+        v-btn(type="submit"
+          block
+          :disabled="!isFormValid"
+          variant="outlined") Create
+
 
 </template>
 
@@ -31,23 +40,37 @@ export default {
   data(){
     return {
       dialog: false,
-      projectType: "local",
-      possibleProjectTypes: ["local", "github"],
-      filepath: "",
-      filepathRules: [
+      isFormValid: false,
+      siloname: "",
+      siloNameRules: [
           v => !!v || 'Path is required',
-          v => !this.filepathExists(v) || 'Path already specified in another project',
-      ]
+          v => !this.siloNameExists(v) || 'Path already specified in another project',
+      ],
+      customer: "",
+      baseUrl: "",
+      baseUrlRules: [
+          v => !!v || 'base_url is required',
+          v => v.endsWith('.sdvi.com') || 'base_url needs to end with .sdvi.com',
+      ],
+      token:"",
+      showToken: false,
     }
   },
   computed: {
-    ...mapGetters('configuration', ['selectedProjectNames', 'errorMessage']),
+    ...mapGetters('configuration', ['selectedSiloNames', 'errorMessage']),
   },
   methods: {
     submit(){
-
+      console.log(`STATUS OF VALIDATION: ${this.isFormValid}`)
+      var payload = {
+        name: this.siloname,
+        customer: this.customer,
+        token: this.token,
+        base_url: this.baseUrl,
+      }
+      this.$store.dispatch('configuration/addNewSilo', payload)
     },
-    filepathExists(value){
+    siloNameExists(value){
       for (const silo of this.$store.getters['configuration/selectedSilos']){
         console.log(silo.name)
         if (silo.name === value){

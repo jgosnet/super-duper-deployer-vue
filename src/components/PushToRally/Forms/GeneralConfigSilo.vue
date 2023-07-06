@@ -4,7 +4,8 @@ v-row.my-3.mx-2
     NewSiloForm
   v-spacer
   v-btn.ml-3(icon="fa-solid fa-arrows-rotate" size="small" @click="loadSilosList")
-ConfirmDialog(ref="confirmDialogue")
+  ConfirmDialog(ref="confirmDialogue")
+
 v-row
   v-col(cols="12")
     div(v-if="this.isLoading" )
@@ -16,31 +17,34 @@ v-row
     div(v-else)
       draggable(v-model="silosList"
         item-key="name"
-        group="project")
+        group="silo"
+        handle=".handle"
+        animation="150"
+        ghost-class="sortable-ghost"
+        fallback-class="fallbackStyleClass"
+        :force-fallback="true")
         template(#item="{element}")
-          v-card(elevation="3" ).my-2
+          v-card(elevation="3" ).my-2.handle
             v-card-title
               v-icon.mr-3(size="x-small" ) fa-solid fa-bars
-              | {{element.name}} ({{element.id}})
+              | {{element.name}}
               v-icon.ml-5(size="x-small" icon="far fa-trash-alt" @click="deleteSilo(element)")
 
               input(type="checkbox" v-model="element.isSelected").float-right
 
             v-card-text
-              | config
-              //v-row.pt-2.px-5
-              //  span.font-weight-bold Type:
-              //  span.font-weight-medium.pl-2 {{element.type}}
-              //v-row.pt-2.px-5(v-if="element.type=='local'" )
-              //  span.font-weight-bold Path:
-              //  span.font-weight-medium.pl-2 {{element.path}}
-              //div(v-if="element.type=='github'")
-              //  v-row.pt-2.px-5
-              //    span.font-weight-bold Repo:
-              //    span.font-weight-medium.pl-2 {{element.repo}}
-              //  v-row.pt-2.px-5
-              //    span.font-weight-bold Branch:
-              //    span.font-weight-medium.pl-2 {{element.branch}}
+              v-row.pt-2.px-5
+                span.font-weight-bold ID:
+                span.font-weight-medium.pl-2 {{element.id}}
+              v-row.pt-2.px-5
+                span.font-weight-bold Name:
+                span.font-weight-medium.pl-2 {{element.name}}
+              v-row.pt-2.px-5
+                span.font-weight-bold Customer:
+                span.font-weight-medium.pl-2 {{element.customer}}
+              v-row.pt-2.px-5
+                span.font-weight-bold Base URL:
+                span.font-weight-medium.pl-2 {{element.base_url}}
 
 
 </template>
@@ -103,5 +107,14 @@ export default {
 </script>
 
 <style scoped>
+.sortable-ghost {
+  opacity: 20%;
+  border: 1px dashed grey;
+  font-size: 0;
+  overflow: hidden;
+}
 
+.fallbackStyleClass{
+  opacity: 70%;
+}
 </style>

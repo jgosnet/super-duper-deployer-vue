@@ -122,10 +122,7 @@ export default {
           for (let obj of response.data){
             const filteredArray = newSilosList.filter((silo) => silo.name == obj.name);
             if (filteredArray.length === 0){
-              newSilosList.push({
-                id: obj.id,
-                name: obj.name
-              })
+              newSilosList.push(obj)
             }
           }
           context.commit('updateSilosList', newSilosList)
@@ -188,5 +185,61 @@ export default {
     context.dispatch('loadProjectsList');
     context.dispatch('loadSilosList');
     context.dispatch('loadDefaultImportPath');
-  }
+  },
+  async addNewProject(context, payload) {
+    const url = `${flask_url}/config/project`
+    console.log(payload)
+    axios.post(url, payload)
+      .then((response) => {
+        console.log(response.statusText)
+        if (response.statusText === 'CREATED'){
+          payload.id = response.data.id
+          payload.type = payload.project_type
+          payload.path = payload.local_path
+          console.log(payload)
+          console.log(`added project: ${payload.id}`)
+          context.commit('addNewProjectToList', payload)
+          return true
+        }
+        return false
+      })
+      .catch((error) => {
+        console.log(error)
+        const errorMessage = 'Failed to add project'
+        context.dispatch('snackbar/showMessage', {
+            message: errorMessage
+          },
+          { root: true }
+        )
+      })
+      .finally(() => {
+      })
+  },
+  async addNewSilo(context, payload) {
+    const url = `${flask_url}/config/silo`
+    console.log(payload)
+    axios.post(url, payload)
+      .then((response) => {
+        console.log(response.statusText)
+        if (response.statusText === 'CREATED'){
+          payload.id = response.data.id
+          console.log(payload)
+          console.log(`added project: ${payload.id}`)
+          context.commit('addNewSiloToList', payload)
+          return true
+        }
+        return false
+      })
+      .catch((error) => {
+        console.log(error)
+        const errorMessage = 'Failed to add silo'
+        context.dispatch('snackbar/showMessage', {
+            message: errorMessage
+          },
+          { root: true }
+        )
+      })
+      .finally(() => {
+      })
+  },
 }

@@ -17,4 +17,10 @@ export default {
   updateDefaultImportPath(state, path){
     state.defaultImportPath = path
   },
+  addNewProjectToList(state, newProject){
+    state.projectsList.push(newProject)
+  },
+  addNewSiloToList(state, newSilo){
+    state.silosList.push(newSilo)
+  },
 }

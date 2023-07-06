@@ -21,16 +21,19 @@ v-card(color="transparent")
             :key="silo.name"
             :value="silo.name")
             keep-alive
-              | {{silo}}
+              RallyImport
 </template>
 
 <script>
 import ImportFromRallyConfiguration from "@/components/Import/ImportFromRallyConfiguration";
 import {mapGetters} from "vuex";
+import RallyImport from "@/components/Import/RallyImport/RallyImport";
+import {computed} from "vue";
 
 export default {
   name: "ImportHome",
   components: {
+    RallyImport,
     ImportFromRallyConfiguration
   },
   data(){
@@ -38,9 +41,19 @@ export default {
       tab: null,
     }
   },
+  provide() {
+    return {
+      selectedSilo: computed(() => this.tab),
+    }
+  },
   computed:{
     ...mapGetters('configuration', ['selectedSilos']),
   },
+  watch: {
+    tab(){
+      console.log(this.tab)
+    }
+  }
 }
 </script>
 

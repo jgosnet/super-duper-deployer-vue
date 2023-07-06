@@ -3,6 +3,14 @@ import App from './App.vue'
 import {createRouter, createWebHistory} from "vue-router";
 import { routes } from './router';
 
+// vuediff
+import VueDiff from 'vue-diff';
+import 'vue-diff/dist/index.css';
+// extend python language
+import python from 'highlight.js/lib/languages/python';
+
+VueDiff.hljs.registerLanguage('python', python);
+
 // cookies
 import VueCookies from 'vue-cookies'
 
@@ -40,6 +48,9 @@ createApp(App)
   .use(router)
   .use(store)
   .use(VueCookies)
+  .use(VueDiff, {
+    componentName: 'Diff',
+  })
   .mount('#app')
 
 
