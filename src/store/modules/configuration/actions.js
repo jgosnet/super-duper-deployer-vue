@@ -1,6 +1,5 @@
-import {flask_url} from "@/scripts/config";
-import axios from "axios";
 import cookie from 'vue-cookies'
+import {api} from "@/scripts/axios_config";
 
 
 export default {
@@ -8,10 +7,10 @@ export default {
     context.commit('increment', payload)
   },
   async loadProjectsList(context) {
-    const url = `${flask_url}/config/project`
+    const url = `config/project`
     this.isLoading = true
     context.commit('updateErrorMessage', "")
-    axios.get(url)
+    api.get(url)
       .then((response) => {
         if (response.statusText === 'OK'){
           // Following order:
@@ -70,9 +69,9 @@ export default {
     context.commit('updateErrorMessage', errorMessage)
   },
   async deleteProject(context, projectId){
-    const url = `${flask_url}/config/project/${projectId}`
+    const url = `config/project/${projectId}`
     this.isLoading = true
-    axios.delete(url)
+    api.delete(url)
       .then((response) => {
         if (response.statusText === 'OK'){
           context.dispatch('loadProjectsList')
@@ -98,10 +97,10 @@ export default {
   },
   // SILOS Actions
   async loadSilosList(context) {
-    const url = `${flask_url}/config/silo`
+    const url = `config/silo`
     this.isLoading = true
     context.commit('updateSiloErrorMessage', "")
-    axios.get(url)
+    api.get(url)
       .then((response) => {
         if (response.statusText === 'OK'){
           let newSilosList = []
@@ -147,9 +146,9 @@ export default {
     context.commit('updateSilosList', payload)
   },
   async deleteSilo(context, siloId){
-    const url = `${flask_url}/config/silo/${siloId}`
+    const url = `config/silo/${siloId}`
     this.isLoading = true
-    axios.delete(url)
+    api.delete(url)
       .then((response) => {
         if (response.statusText === 'OK'){
           context.dispatch('loadSilosList')
@@ -187,9 +186,9 @@ export default {
     context.dispatch('loadDefaultImportPath');
   },
   async addNewProject(context, payload) {
-    const url = `${flask_url}/config/project`
+    const url = `config/project/${payload.project_type}`
     console.log(payload)
-    axios.post(url, payload)
+    api.post(url, payload)
       .then((response) => {
         console.log(response.statusText)
         if (response.statusText === 'CREATED'){
@@ -216,9 +215,9 @@ export default {
       })
   },
   async addNewSilo(context, payload) {
-    const url = `${flask_url}/config/silo`
+    const url = `config/silo`
     console.log(payload)
-    axios.post(url, payload)
+    api.post(url, payload)
       .then((response) => {
         console.log(response.statusText)
         if (response.statusText === 'CREATED'){

@@ -26,8 +26,7 @@ v-card.w-100(density="compact" ).ma-0.pa-0
 
 <script>
 import ProjectFolder from "@/components/PushToRally/PushFolder/ProjectFolder";
-import {flask_url} from "@/scripts/config";
-import axios from "axios";
+import {api} from "@/scripts/axios_config";
 
 export default {
   name: "ProjectRoot",
@@ -59,8 +58,8 @@ export default {
     },
     loadProjectStructure(){
       this.isLoading = true
-      const url = `${flask_url}/project/${this.project.id}`
-      axios.get(url, { params: { refresh: true}})
+      const url = `project/${this.project.id}`
+      api.get(url, { params: { refresh: true}})
       .then((response) => {
         if (response.statusText === 'OK'){
           console.log("project loaded")

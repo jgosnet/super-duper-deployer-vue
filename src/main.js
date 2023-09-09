@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import {createRouter, createWebHistory} from "vue-router";
 import { routes } from './router';
+import {store} from "@/store/store";
 
 // vuediff
 import VueDiff from 'vue-diff';
@@ -41,9 +42,28 @@ const router = createRouter({
   routes
 });
 
-import {store} from "@/store/store";
 
-createApp(App)
+router.beforeEach(function(to, from, next){
+    console.log(`Login on page:`)
+    console.log(from)
+    console.log(to)
+    console.log(`is logged in ?`)
+    console.log(store.getters['auth/isLoggedIn'])
+    if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']){
+      next('/login');
+    }
+    else if (to.path === '/login' && store.getters['auth/isLoggedIn']){
+      next('/export')
+    }
+    else {
+      next()
+    }
+
+  }
+);
+
+
+export const Vue = createApp(App)
   .use(vuetify)
   .use(router)
   .use(store)

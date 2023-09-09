@@ -4,7 +4,7 @@ v-card(color="transparent" elevation="0" )
   SnackBarPopup
   v-layout
     v-app-bar(color="surface-variant" prominent density="compact" )
-      v-menu(transition="slide-y-transition")
+      v-menu(transition="slide-y-transition" v-if="isLoggedIn")
         template(v-slot:activator="{ props }")
           v-btn(v-bind="props" icon="fas fa-bars")
         v-list(density="compact" nav)
@@ -18,6 +18,9 @@ v-card(color="transparent" elevation="0" )
       v-toolbar-title Super Duper Deploy Tool
       //v-spacer
       i.pr-4 Beta0.1 (6/6/2023)
+      v-btn.mr-2(link to="login" v-show="!isLoggedIn" ) login
+      v-btn.mr-2(@click="logout" v-show="isLoggedIn" ) log out
+
 
     v-main.pt-1
       router-view(v-slot="{ Component }")
@@ -32,6 +35,7 @@ v-card(color="transparent" elevation="0" )
 import './assets/main.css'
 import SnackBarPopup from "@/components/utils/SnackBarPopup";
 import PresetDiffView from "@/components/Compare/PresetDiffView";
+import {mapGetters} from "vuex";
 
 export default {
   name: 'App',
@@ -49,16 +53,22 @@ export default {
       ]
     }
   },
-  computed: {
-  },
+    computed: {
+      ...mapGetters('auth', ['isLoggedIn'])
+    },
   methods: {
     openSnackbar(){
       this.snackbar = true
+    },
+    async logout(){
+      console.log(`Logging out`)
+      await this.$store.dispatch('auth/logout')
+      this.$router.replace('/login')
     }
   },
   mounted() {
     console.log('loading!')
-    this.$store.dispatch('configuration/loadConfiguration');
+    // this.$store.dispatch('configuration/loadConfiguration');
   }
 }
 </script>

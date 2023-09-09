@@ -1,11 +1,10 @@
-import {flask_url} from "@/scripts/config";
-import axios from "axios";
+import {api} from "@/scripts/axios_config";
 
 export default {
   // eslint-disable-next-line no-unused-vars
   async updatePresetStatus(context, payload) {
-    const url = `${flask_url}/compare/preset`
-    return axios.get(url, {
+    const url = `compare/preset`
+    return api.get(url, {
         params: {
           silo_id: payload.silo_id,
           preset_id: payload.preset_id,
