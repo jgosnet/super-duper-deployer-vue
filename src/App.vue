@@ -48,7 +48,7 @@ export default {
       menuItems: [
         {title: 'Home', path: '/', icon: 'fas fa-home'},
         {title: 'Push from project', path: '/export', icon: 'fas fa-cloud-upload-alt'},
-        {title: 'Import From Rally', path: '/import', icon: 'fas fa-download'},
+        {title: 'Import From Rally', path: '/silo', icon: 'fas fa-download'},
         {title: 'Compare Silos', path: '/compare', icon: 'fas fa-not-equal'}
       ]
     }

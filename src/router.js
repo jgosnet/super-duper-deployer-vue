@@ -3,6 +3,8 @@ import PusherHome from "@/components/PushToRally/PusherHome";
 import ImportHome from "@/components/Import/ImportHome";
 import CompareHome from "@/components/Compare/CompareHome";
 import UserAuth from "@/components/Login/UserAuth";
+import {createRouter, createWebHistory} from "vue-router";
+import {store} from "@/store/store";
 
 export const routes = [
   {
@@ -19,7 +21,7 @@ export const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/import',
+    path: '/silo',
     component: ImportHome,
     meta: { requiresAuth: true }
   },
@@ -29,6 +31,31 @@ export const routes = [
     meta: { requiresAuth: true }
   }
 ]
+
+export const router = createRouter({
+  history: createWebHistory(),
+  routes
+});
+
+
+router.beforeEach(function(to, from, next){
+    console.log(`Login on page:`)
+    console.log(from)
+    console.log(to)
+    console.log(`is logged in ?`)
+    console.log(store.getters['auth/isLoggedIn'])
+    if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']){
+      next('/login');
+    }
+    else if (to.path === '/login' && store.getters['auth/isLoggedIn']){
+      next('/export')
+    }
+    else {
+      next()
+    }
+
+  }
+);
 
 // Router.beforeEach(function(to, from, next){
 //   if (to.meta.requiresAuth && !this.$store.getters['auth/isLoggedIn']){

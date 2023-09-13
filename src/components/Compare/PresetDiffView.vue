@@ -22,10 +22,10 @@ export default {
       language: "python",
       // prev: "this is the text\nsecond line\nTEST",
       // current: "this is the text\nno line\nTEST",
-      prev: "from rally import asset, supplyChain, files\n" +
-          "import logging\n" +
-          "import __pl_logging\n" +
-          "from timecode import Timecode\n" +
+      prev: "from rally silo asset, supplyChain, files\n" +
+          "silo logging\n" +
+          "silo __pl_logging\n" +
+          "from timecode silo Timecode\n" +
           "\n" +
           "logger = logging.getLogger(\"test_SDK\")\n" +
           "\n" +
@@ -41,8 +41,8 @@ export default {
           "    tc = Timecode(23.974, start_seconds=0.1)\n" +
           "\n" +
           "    return\n",
-      current: "from rally import asset, supplyChain, files\n" +
-          "import logging\n" +
+      current: "from rally silo asset, supplyChain, files\n" +
+          "silo logging\n" +
           "\n" +
           "logger = logging.getLogger(\"test_SDK1\")\n" +
           "\n" +

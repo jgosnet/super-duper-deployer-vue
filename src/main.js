@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import {createRouter, createWebHistory} from "vue-router";
-import { routes } from './router';
+// import {createRouter, createWebHistory} from "vue-router";
+// import { routes } from './router';
 import {store} from "@/store/store";
 
 // vuediff
@@ -22,6 +22,8 @@ import { aliases, fa } from 'vuetify/iconsets/fa'
 import { mdi } from 'vuetify/iconsets/mdi'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import * as labsComponents from 'vuetify/labs/components'
+import {VDataTable} from "vuetify/labs/VDataTable";
 
 const vuetify = createVuetify({
   icons: {
@@ -32,35 +34,16 @@ const vuetify = createVuetify({
       mdi,
     },
   },
-  components,
+  components: {
+    ...components,
+    ...labsComponents,
+    VDataTable
+  },
   directives,
 })
 
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-});
-
-
-router.beforeEach(function(to, from, next){
-    console.log(`Login on page:`)
-    console.log(from)
-    console.log(to)
-    console.log(`is logged in ?`)
-    console.log(store.getters['auth/isLoggedIn'])
-    if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']){
-      next('/login');
-    }
-    else if (to.path === '/login' && store.getters['auth/isLoggedIn']){
-      next('/export')
-    }
-    else {
-      next()
-    }
-
-  }
-);
+import {router} from "@/router"
 
 
 export const Vue = createApp(App)
