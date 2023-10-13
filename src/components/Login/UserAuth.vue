@@ -54,8 +54,10 @@ export default {
           login: this.login,
           password: this.password
           })
+        await this.$store.dispatch('projectConfiguration/loadProjectsList');
+        await this.$store.dispatch('siloConfiguration/loadSilosList');
         this.$router.replace('/export')
-        this.$store.dispatch('configuration/loadConfiguration');
+        // this.$store.dispatch('configuration/loadConfiguration');
       } catch (err) {
         console.log(`There was an error trying to log in`)
       }

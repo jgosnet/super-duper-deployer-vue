@@ -2,6 +2,11 @@
   "name": "super-duper-deployer-vue",
   "version": "0.1.0",
   "private": true,
+  "proxy": {
+    "*": {
+      "target": "http://127.0.0.1:5000"
+    }
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

@@ -58,18 +58,19 @@ v-dialog(v-model="localDialog"
 </template>
 
 <script>
-import GeneralConfig from "@/components/PushToRally/Forms/GeneralConfig";
+import GeneralConfig from "@/components/Configuration/GeneralConfig";
 import {mapGetters} from "vuex";
 
 export default {
-  name: "PushToRallyConfiguration",
+  name: "ConfigurationWidget",
   components: {
     GeneralConfig,
   },
   props:{
   },
   computed: {
-    ...mapGetters('configuration', ['selectedProjectNames', 'selectedSiloNames']),
+    ...mapGetters('projectConfiguration', ['selectedProjectNames']),
+    ...mapGetters('siloConfiguration', ['selectedSiloNames']),
     show: {
       get() {
         return this.dialog
@@ -111,8 +112,8 @@ export default {
     },
     saveConfiguration(){
       console.log('trying to save cookies:')
-      this.$cookies.set('selectedProjects', JSON.stringify(this.$store.getters['configuration/projectsList']))
-      this.$cookies.set('selectedSilos', JSON.stringify(this.$store.getters['configuration/selectedSilos']))
+      this.$cookies.set('selectedProjects', JSON.stringify(this.$store.getters['projectConfiguration/projectsList']))
+      this.$cookies.set('selectedSilos', JSON.stringify(this.$store.getters['siloConfiguration/selectedSilos']))
       this.$store.dispatch('snackbar/showMessage', {
             message: "Configuration saved"
           }

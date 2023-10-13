@@ -1,9 +1,9 @@
 <template lang="pug">
-v-row.ma-1
-  v-col.py-0(cols="6")
+v-row
+  v-col.py-1.px-3(cols="6")
     GeneralConfigSilo
-  v-divider(vertical)
-  v-col.py-0(cols="6")
+  //v-divider(vertical)
+  v-col.py-1.px-3(cols="6")
     GeneralConfigProject
 
 
@@ -11,8 +11,8 @@ v-row.ma-1
 </template>
 
 <script>
-import GeneralConfigProject from "@/components/PushToRally/Forms/GeneralConfigProject";
-import GeneralConfigSilo from "@/components/PushToRally/Forms/GeneralConfigSilo";
+import GeneralConfigProject from "@/components/Configuration/Project/GeneralConfigProject";
+import GeneralConfigSilo from "@/components/Configuration/Silo/GeneralConfigSilo";
 
 export default {
   name: "GeneralConfig",

@@ -1,5 +1,5 @@
 <template lang="pug">
-v-card(color="transparent" elevation="0" )
+v-container(fluid )
   //PresetDiffView
   SnackBarPopup
   v-layout
@@ -17,7 +17,7 @@ v-card(color="transparent" elevation="0" )
 
       v-toolbar-title Super Duper Deploy Tool
       //v-spacer
-      i.pr-4 Beta0.1 (6/6/2023)
+      i.pr-4 10/04/2023
       v-btn.mr-2(link to="login" v-show="!isLoggedIn" ) login
       v-btn.mr-2(@click="logout" v-show="isLoggedIn" ) log out
 
@@ -74,13 +74,12 @@ export default {
 </script>
 
 <style>
-
 body{
-        background-image: url('/src/assets/background-2462431_1920.jpg') !important;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: 100% 100%;
+  position: relative;
+  background: linear-gradient(45deg, #5757D9 0%, #21D9F7 100%);
+  height: 100vh;
 }
+
 #app {
   font-family: Roboto;
   -webkit-font-smoothing: antialiased;
@@ -88,8 +87,6 @@ body{
   text-align: center;
   color: #2c3e50;
   margin-top: 45px;
-
-
 }
 
 .default_height {

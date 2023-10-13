@@ -69,20 +69,20 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('configuration', ['selectedSiloNames', 'siloErrorMessage']),
+    ...mapGetters('siloConfiguration', ['selectedSiloNames', 'siloErrorMessage']),
     silosList: {
       get(){
-        console.log(this.$store.getters['configuration/silosList'])
-        return this.$store.getters['configuration/silosList']
+        console.log(this.$store.getters['siloConfiguration/silosList'])
+        return this.$store.getters['siloConfiguration/silosList']
       },
       set(value){
-        this.$store.dispatch('configuration/updateSilosList', value)
+        this.$store.dispatch('siloConfiguration/updateSilosList', value)
       }
     }
   },
   methods:{
     loadSilosList() {
-      this.$store.dispatch('configuration/loadSilosList');
+      this.$store.dispatch('siloConfiguration/loadSilosList');
     },
     async deleteSilo(silo) {
       const ok = await this.$refs.confirmDialogue.show({
@@ -93,7 +93,7 @@ export default {
       // If you throw an error, the method will terminate here unless you surround it wil try/catch
       if (ok) {
         console.log('Trying to delete this project')
-        this.$store.dispatch('configuration/deleteSilo', silo.id);
+        this.$store.dispatch('siloConfiguration/deleteSilo', silo.id);
       } else {
         console.log('You chose not to delete this page. Doing nothing now.')
       }

@@ -57,7 +57,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('configuration', ['selectedSiloNames', 'errorMessage']),
+    ...mapGetters('siloConfiguration', ['selectedSiloNames', 'errorMessage']),
   },
   methods: {
     submit(){
@@ -68,10 +68,10 @@ export default {
         token: this.token,
         base_url: this.baseUrl,
       }
-      this.$store.dispatch('configuration/addNewSilo', payload)
+      this.$store.dispatch('siloConfiguration/addNewSilo', payload)
     },
     siloNameExists(value){
-      for (const silo of this.$store.getters['configuration/selectedSilos']){
+      for (const silo of this.$store.getters['siloConfiguration/selectedSilos']){
         console.log(silo.name)
         if (silo.name === value){
           return true

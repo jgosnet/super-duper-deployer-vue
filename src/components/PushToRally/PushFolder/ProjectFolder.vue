@@ -41,7 +41,7 @@ export default {
   name: "ProjectFolder",
   components: {ProjectPresets},
   computed:{
-    ...mapGetters('configuration', ['selectedSiloNames']),
+    ...mapGetters('siloConfiguration', ['selectedSiloNames']),
     computedPresets(){
       console.log(`computed presets: ${this.files}`)
       if (this.files == undefined){

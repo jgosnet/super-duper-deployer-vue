@@ -1,22 +1,23 @@
 <template lang="pug">
-v-card(color="transparent")
+v-card()
   v-card-title
     v-row.py-3
       v-icon.ml-4(icon="fas fa-cloud-upload-alt")
       h2.ml-4 Push from project
 
       v-spacer
-      push-to-rally-configuration
-  v-card-text.w-100
+      ConfigurationWidget
+
+  v-card-text.w-100.pa-2
     //v-row
     //  v-btn(@click="openAll(this.folders)"
     //    prepend-icon="fas fa-plus") Expand All
 
     div(v-if="selectedProjects.length === 0").py-6
-      span(align="center") No projects selected.
+      h1(align="center") No projects selected.
     div(v-else)
       v-card.w-100
-        v-tabs(v-model="tab" bg-color="blue-grey-darken-4")
+        v-tabs(v-model="tab" bg-color="blue-grey-darken-4" selected-class="selected-tab")
           v-tab(v-for="project in selectedProjects" :value="project.id")
             | {{ project.name}}
       v-card-text(fluid).ma-0.pa-0
@@ -32,13 +33,13 @@ v-card(color="transparent")
 <script>
 import ProjectFolder from "@/components/PushToRally/PushFolder/ProjectFolder";
 import ProjectRoot from "@/components/PushToRally/PushFolder/ProjectRoot";
-import PushToRallyConfiguration from "@/components/PushToRally/PushToRallyConfiguration";
+import ConfigurationWidget from "@/components/Configuration/ConfigurationWidget";
 import {mapGetters} from "vuex";
 
 export default {
   name: "PusherHome",
   components: {
-    PushToRallyConfiguration,
+    ConfigurationWidget,
     ProjectRoot,
     ProjectFolder,
   },
@@ -50,7 +51,7 @@ export default {
     }
   },
   computed:{
-    ...mapGetters('configuration', ['selectedProjects']),
+    ...mapGetters('projectConfiguration', ['selectedProjects']),
   },
   methods: {
     openAll(current_folders){
@@ -62,6 +63,7 @@ export default {
     }
   },
   mounted() {
+    // await this.$store.dispatch('configuration/loadConfiguration');
     console.log("hello")
   }
 }
@@ -78,5 +80,9 @@ export default {
 
 .shifted{
 
+}
+
+.selected-tab{
+  background-color: darkslategrey;
 }
 </style>

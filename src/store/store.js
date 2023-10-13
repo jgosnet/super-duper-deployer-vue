@@ -4,6 +4,8 @@ import configuration from "@/store/modules/configuration";
 import snackbar from "@/store/modules/snackbar";
 import project from "@/store/modules/project";
 import auth from "@/store/modules/auth";
+import projectConfiguration from "@/store/modules/projectConfiguration";
+import siloConfiguration from "@/store/modules/siloConfiguration";
 
 export const store = createStore({
   state: {},
@@ -15,5 +17,7 @@ export const store = createStore({
     configuration,
     project,
     auth,
+    projectConfiguration,
+    siloConfiguration,
   }
 })

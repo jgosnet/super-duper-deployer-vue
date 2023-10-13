@@ -7,9 +7,11 @@ v-row.my-3.mx-2
 ConfirmDialog(ref="confirmDialogue")
 v-row
   v-col(cols="12")
-    div(v-if="this.isLoading" )
-      v-progress-circular(v-show="this.isLoading" indeterminate
-        color="primary")
+    div(v-if="isLoading" )
+      v-progress-circular(v-show="isLoading" indeterminate
+        color="primary"
+        model-value="20")
+      span.pl-2 Loading..
     div(v-else-if="errorMessage")
       v-icon(color="red") fa-solid fa-triangle-exclamation
       | {{errorMessage}}
@@ -34,16 +36,18 @@ v-row
               input(type="checkbox" v-model="element.isSelected").float-right
 
             v-card-text
+              | {{element}}
               v-row.pt-2.px-5
                 span.font-weight-bold ID:
                 span.font-weight-medium.pl-2 {{element.id}}
               v-row.pt-2.px-5
                 span.font-weight-bold Type:
                 span.font-weight-medium.pl-2 {{element.type}}
-              v-row.pt-2.px-5(v-if="element.type=='local'" )
+
+              v-row.pt-2.px-5(v-if="element.type==='local'" )
                 span.font-weight-bold Path:
                 span.font-weight-medium.pl-2 {{element.path}}
-              div(v-if="element.type=='github'")
+              div(v-if="element.type==='github'")
                 v-row.pt-2.px-5
                   span.font-weight-bold Repo:
                   span.font-weight-medium.pl-2 {{element.repo}}
@@ -60,7 +64,7 @@ v-row
 import draggable from "vuedraggable";
 import {mapGetters} from "vuex";
 import ConfirmDialog from "@/components/utils/ConfirmDialog";
-import NewProjectForm from "@/components/PushToRally/Forms/Project/NewProjectForm";
+import NewProjectForm from "@/components/Configuration/Project/NewProjectForm";
 
 export default {
   name: "GeneralConfigProject",
@@ -71,25 +75,24 @@ export default {
   },
   data(){
     return {
-      isLoading: false,
       localSelectedProjects: this.selectedProjectNames,
     }
   },
   computed: {
-    ...mapGetters('configuration', ['selectedProjectNames', 'errorMessage']),
+    ...mapGetters('projectConfiguration', ['selectedProjectNames', 'isLoading', 'errorMessage']),
     projectList: {
       get(){
-        console.log(this.$store.getters['configuration/projectsList'])
-        return this.$store.getters['configuration/projectsList']
+        console.log(this.$store.getters['projectConfiguration/projectsList'])
+        return this.$store.getters['projectConfiguration/projectsList']
       },
       set(value){
-        this.$store.dispatch('configuration/updateProjectsList', value)
+        this.$store.dispatch('projectConfiguration/updateProjectsList', value)
       }
     },
   },
   methods:{
     loadProjectsList() {
-      this.$store.dispatch('configuration/loadProjectsList');
+      this.$store.dispatch('projectConfiguration/loadProjectsList');
     },
     async deleteProject(project) {
       const ok = await this.$refs.confirmDialogue.show({
@@ -100,7 +103,7 @@ export default {
       // If you throw an error, the method will terminate here unless you surround it wil try/catch
       if (ok) {
         console.log('Trying to delete this project')
-        this.$store.dispatch('configuration/deleteProject', project.id);
+        this.$store.dispatch('projectConfiguration/deleteProject', project.id);
       } else {
         console.log('You chose not to delete this page. Doing nothing now.')
       }

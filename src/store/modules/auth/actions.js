@@ -3,8 +3,6 @@ import VueCookies from 'vue-cookies'
 import {api} from "@/scripts/axios_config";
 
 export default {
-
-
   async login(context, payload){
     const url = `auth/session`
     context.commit('updateLoginLoading', true)
@@ -12,6 +10,8 @@ export default {
       username: payload.login,
       password: payload.password
     }
+    // console.log(url)
+    // console.log(JSON.stringify(formatted_payload))
     return api.post(url, JSON.stringify(formatted_payload))
       .then((response) => {
         if (response.statusText === 'OK'){
@@ -30,10 +30,13 @@ export default {
             isLoggedIn: true
           });
         }
-        console.log(response.data)
+        console.log(response.data);
+        console.log("loading project");
+        // await context.dispatch('projectConfiguration/loadProjectsList', null, {root:true});
+        console.log("loaded")
       })
       .catch((error) => {
-        console.log(error)
+        console.error(error)
         const errorMessage = 'Failed to login'
         context.dispatch('snackbar/showMessage', {
             message: errorMessage

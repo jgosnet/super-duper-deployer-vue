@@ -23,7 +23,13 @@ v-dialog(v-model="dialog"
         v-btn(type="submit"
           block
           :disabled="!isFormValid"
-          variant="outlined") Create
+          variant="outlined" text="Create" )
+        div(v-if="isLoading" )
+          v-progress-circular(v-show="isLoading" indeterminate
+              color="primary"
+              model-value="20")
+          span.pl-2 Loading..
+
 
 </template>
 
@@ -34,6 +40,7 @@ export default {
   name: "NewProjectForm",
   data(){
     return {
+      isLoading: false,
       dialog: false,
       isFormValid: false,
       name: "",
@@ -51,20 +58,25 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('configuration', ['selectedProjectNames', 'errorMessage']),
+    ...mapGetters('projectConfiguration', ['selectedProjectNames', 'errorMessage']),
   },
   methods: {
-    submit(){
+    async submit() {
       console.log(`STATUS OF VALIDATION: ${this.isFormValid}`)
+      this.isLoading = true;
       var payload = {
         name: this.name,
         project_type: this.projectType,
         local_path: this.filepath
-      }
-      this.$store.dispatch('configuration/addNewProject', payload)
+      };
+      await this.$store.dispatch('projectConfiguration/addNewProject', payload);
+      await this.$store.dispatch('configuration/loadConfiguration', payload);
+      this.isLoading = false;
+      this.dialog = false;
+
     },
     filepathExists(value){
-      for (const project of this.$store.getters['configuration/selectedProjects']){
+      for (const project of this.$store.getters['projectConfiguration/selectedProjects']){
         console.log(project.path)
         if (project.path === value){
           return true
@@ -73,7 +85,7 @@ export default {
       return false
     },
     nameExists(value){
-      for (const project of this.$store.getters['configuration/selectedProjects']){
+      for (const project of this.$store.getters['projectConfiguration/selectedProjects']){
         console.log(project.name)
         if (project.name === value){
           return true

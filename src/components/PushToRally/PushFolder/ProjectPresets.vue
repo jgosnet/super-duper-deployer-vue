@@ -13,6 +13,7 @@ v-container(class="mx-1" fluid).preset
     density="compact"
     :item-class="presetInSiloClass"
     color="grey-lighten-4"
+    show-select
   )
     template(v-slot:item.existsInSilo="{ item }")
       div.float-left
@@ -53,7 +54,7 @@ export default {
     VDataTable
   },
   computed: {
-    ...mapGetters('configuration', ['selectedSilos']),
+    ...mapGetters('siloConfiguration', ['selectedSilos']),
   },
   props: {
     presetsList: Array,
