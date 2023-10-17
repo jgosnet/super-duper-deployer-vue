@@ -11,7 +11,7 @@ v-card()
     div(v-if="selectedSilos.length === 0").py-6
       span(align="center") No silos selected.
     div(v-else)
-      | {{selectedSilos}}
+      //| {{selectedSilos}}
       v-card.w-100
         v-tabs(v-model="tab" bg-color="blue-grey-darken-4" selected-class="selected-tab" )
           v-tab(v-for="silo in selectedSilos" :value="silo.name")
@@ -22,13 +22,13 @@ v-card()
             :key="silo.name"
             :value="silo.name")
             keep-alive
-              RallyImport
+              RallyImport(:selectedSilo="silo")
 </template>
 
 <script>
 import {mapGetters} from "vuex";
 import RallyImport from "@/components/Import/RallyImport/RallyImport";
-import {computed} from "vue";
+// import {computed} from "vue";
 import ConfigurationWidget from "@/components/Configuration/ConfigurationWidget";
 
 export default {
@@ -42,11 +42,11 @@ export default {
       tab: null,
     }
   },
-  provide() {
-    return {
-      selectedSilo: computed(() => this.tab),
-    }
-  },
+  // provide() {
+  //   return {
+  //     selectedSilo: computed(() => this.tab),
+  //   }
+  // },
   computed:{
     ...mapGetters('siloConfiguration', ['selectedSilos']),
   },

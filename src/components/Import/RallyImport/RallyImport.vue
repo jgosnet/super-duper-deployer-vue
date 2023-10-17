@@ -18,7 +18,7 @@ v-card.pt-3.w-100
         v-window-item(value="presets" )
           RallyImportPresets
 
-        v-window-item(value="presets" )
+        v-window-item(value="rules" )
           RallyImportRules
 </template>
 
@@ -27,6 +27,14 @@ import RallyImportPresets from "@/components/Import/RallyImport/RallyImportPrese
 import RallyImportRules from "@/components/Import/RallyImport/RallyImportRules";
 export default {
   name: "RallyImport",
+  props: {
+    selectedSilo: Object,
+  },
+  provide(){
+    return {
+      selectedSilo: this.selectedSilo,
+    }
+  },
   components:{
     RallyImportRules,
     RallyImportPresets,

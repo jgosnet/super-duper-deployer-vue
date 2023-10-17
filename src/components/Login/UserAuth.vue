@@ -56,7 +56,7 @@ export default {
           })
         await this.$store.dispatch('projectConfiguration/loadProjectsList');
         await this.$store.dispatch('siloConfiguration/loadSilosList');
-        this.$router.replace('/export')
+        this.$router.replace(this.$route.query.redirect || '/');
         // this.$store.dispatch('configuration/loadConfiguration');
       } catch (err) {
         console.log(`There was an error trying to log in`)

@@ -45,15 +45,17 @@ router.beforeEach(function(to, from, next){
     console.log(`is logged in ?`)
     console.log(store.getters['auth/isLoggedIn'])
     if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']){
-      next('/login');
+      next({
+        path: '/login',
+        query: { redirect: to.fullPath }
+      })
     }
     else if (to.path === '/login' && store.getters['auth/isLoggedIn']){
-      next('/export')
+      next()
     }
     else {
       next()
     }
-
   }
 );
 

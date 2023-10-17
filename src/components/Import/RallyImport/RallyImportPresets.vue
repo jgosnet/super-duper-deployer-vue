@@ -21,7 +21,7 @@ v-card.w-100
     span.pl-5.pt-2 Loading..
     v-btn.ml-5(@click="stopLoading = true" :disabled="stopLoading" ) {{cancellingButton}}
   v-row
-    | {{this.selectedProjects}}
+    | {{this.selectedSilo}}
     div(v-show="selectedPresets.length > 0").w-100
       v-row.mb-1.pb-1.pl-3
         v-col(cols="3")
@@ -64,8 +64,49 @@ v-card.w-100
           v-slot:[`item.status_${projectId}`]="{ item }")
           div(v-if="item.value[`status_${projectId}`] === 'not found'" ).float-left
             v-icon(color="red" ) fa-solid fa-square-xmark
+          div(v-else-if="item.value[`status_${projectId}`] === 'different'" ).float-left
+            v-icon(color="orange" ) fa-solid fa-triangle-exclamation
+          div(v-else-if="item.value[`status_${projectId}`] === 'duplicate'" ).float-left
+            v-icon(color="red" ).pr-4 fa-solid fa-triangle-exclamation
+            v-icon(color="red" ) fa-solid fa-clone
+
+          div(v-else-if="item.value[`status_${projectId}`] === 'downloading..'").float-left
+            v-progress-circular(indeterminate color="primary" )
+
+          div(v-else-if="item.value[`status_${projectId}`] === 'complete'\
+              || item.value[`status_${projectId}`] === 'same'").float-left
+            v-icon(color="green" ) fa-solid fa-file-circle-check
+
+          div(v-else-if="item.value[`status_${projectId}`] === 'error'").float-left
+            v-tooltip(left)
+              template(v-slot:activator="{ props }")
+                v-icon(v-bind="props" color="red") fa-solid fa-file-circle-exclamation
+              span {{item.errorDetails || "unknown error"}}
+
           div(v-else)
-            span {{ item.value[`status_${projectId}`]}}
+            span --{{ item.value[`status_${projectId}`]}}
+
+
+
+
+        template(v-for="projectId in this.selectedProjectIds"
+          v-slot:[`item.prefix_${projectId}`]="{ item }")
+          div(v-show="item.value[`prefix_${projectId}`].length > 0" )
+            span.pr-2 {{item.value[`prefix_${projectId}`].length}}
+            v-tooltip(left)
+              template(v-slot:activator="{ props }")
+                v-icon(v-bind="props" color="blue") fa-solid fa-folder-tree
+              div
+                div(v-for="linePrefix in item.value[`prefix_${projectId}`]")
+                  | {{linePrefix.path || '/'}}:
+                  b.pl-2 {{linePrefix.status || 'n/a'}}
+                  v-icon(v-if="linePrefix.status == different" color="red") fa-solid fa-file-circle-exclamation
+                  v-icon(v-if="linePrefix.status == same" color="green") fa-solid fa-file-circle-check
+          //template(v-slot:activator="{ props }")
+          //  v-icon(v-bind="props" color="blue")
+          //span test
+
+          //
 
 
         template(v-slot:item.name="{ item }")
@@ -75,15 +116,7 @@ v-card.w-100
           span.float-left {{item.value.id}}
 
         template(v-slot:item.status="{ item }")
-          v-progress-circular(v-show="item.value.status=='downloading..'" indeterminate color="primary" )
 
-          v-icon(v-show="item.value.status=='complete'" color="green" ) fa-solid fa-file-circle-check
-
-          div(v-show="item.value.status=='error'")
-            v-tooltip(left)
-              template(v-slot:activator="{ props }")
-                v-icon(v-bind="props" color="red") fa-solid fa-file-circle-exclamation
-              span {{item.errorDetails || "unknown error"}}
 
 </template>
 
@@ -124,7 +157,8 @@ export default {
           title: 'id',
           sortable: true,
           key: 'id',
-          align: 'start'
+          align: 'start',
+          width: '20px',
         },
         {
           title: 'Provider Type',
@@ -169,20 +203,9 @@ export default {
         return "Cancelling..";
       }
       return "Cancel";
-    },
-    siloId(){
-      console.log()
-
-      const selectedSiloConfig = this.$store.getters['siloConfiguration/selectedSilos'].find(x => x.name === this.selectedSilo.value)
-      console.log("Selected silo config: ")
-      console.log(this.selectedSilo.value)
-      console.log(this.$store.getters['siloConfiguration/selectedSilos'])
-      console.log(selectedSiloConfig)
-      console.log("---")
-      return selectedSiloConfig.id
     }
   },
-    watch: {
+  watch: {
     selectedProjectIds(newValue, oldValue){
       console.log(`Project selection changed: old -> ${oldValue}`);
       this.refreshPresetHeaders();
@@ -193,16 +216,21 @@ export default {
       return new Date().toLocaleString();
     },
     async loadPresets() {
-      this.updateMessage = `listing presets - ${this.getCurrentDate()}`
+
       this.presetList = [];
       this.stopLoading = false
       this.selectedPresets = [];
       this.isLoading = true;
+      // first step: refresh the project
+      this.updateMessage = `refreshing projects..`
+      await this.refreshProjects(this.selectedProjectIds);
+
+      this.updateMessage = `listing presets - ${this.getCurrentDate()}`
       let url = `silo/presets/list`
       this.isLoading = true
       let finished = false
       do {
-        const result = await this.getPresetsByUrl(url, this.siloId, this.selectedProjectIds)
+        const result = await this.getPresetsByUrl(url, this.selectedSilo.id, this.selectedProjectIds)
         console.log("RESULT")
         console.log(result)
         if (this.stopLoading && result.links !== undefined && result.links.next !== undefined){
@@ -227,8 +255,24 @@ export default {
       this.isLoading = false;
 
     },
+    async refreshProjects(projectIds){
+      for (const projectId of projectIds){
+        const url = `/project/${projectId}`
+        await api.get(url)
+          .then(() => {
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+          .finally(() => {
+            console.log(`refresh complete`)
+          })
+      }
+    },
+
     async getPresetsByUrl(url, siloId, projectIds){
-      const response = api.get(url, {params: {silo_id: siloId, project_ids: projectIds.join(',')}})
+      let paramsData = {params: {silo_id: siloId, project_ids: projectIds.join(',')}}
+      const response = api.get(url, paramsData)
           .then((response) => {
             console.log("DATA")
             console.log(response.data)
@@ -241,7 +285,9 @@ export default {
                 last_update: new Date(x.last_update).toLocaleString(),
               }
               for (const projectItem of this.selectedProjects){
-                newRes[`status_${projectItem.id}`] = x.project_id_comparisons[projectItem.id]
+                newRes[`${projectItem.id}`] = x.projects_data[projectItem.id]
+                newRes[`prefix_${projectItem.id}`] = x.projects_data[projectItem.id].prefixes
+                newRes[`status_${projectItem.id}`] = x.projects_data[projectItem.id].status
               }
               this.presetList.push(newRes);
             });
@@ -256,29 +302,44 @@ export default {
       this.presetLoadingPromise = response
       return response
     },
-    downloadPresetByItem(item) {
-      console.log("downloading preset:")
-      console.log(item)
-      item.status = "downloading.."
 
-      const url = "/"
-      api.get(url)
+    async downloadPresetByProject(item, projectId, prefix) {
+      console.log(`downloading preset ${item.name} for project: ${projectId} (${prefix})`)
+      console.log(item)
+      item[`status_${projectId}`] = "downloading.."
+
+      const url = `silo/${this.selectedSilo.id}/download/${projectId}/presets/${item.id}`
+      await api.get(url, {params: {prefix: prefix}})
           .then(() => {
-            item.status = "complete"
+            item[`status_${projectId}`] = "complete"
           })
           .catch((error) => {
             console.log(error)
-            item.status = "error"
+            item[`status_${projectId}`] = "error"
           })
           .finally(() => {
             console.log(`Download attempt complete for ${item}`)
           })
+
     },
     async downloadSelection(){
+      // set the parameters
+      const definedPrefix = this.downloadPrefix;
+      const useExistingPrefix = this.useExistingPrefix;
+      const destinationProjects = this.selectedImportProjects;
       const currentSelection = this.selectedPresets;
       for (const item of currentSelection){
         console.log(item);
-        this.downloadPresetByItem(item);
+        for (const project of destinationProjects){
+          console.log(`downloading preset for project: ${project}`)
+          let projectPrefix = definedPrefix;
+          if (useExistingPrefix || !item.prefix){
+            // eslint-disable-next-line no-unused-vars
+            projectPrefix = item.project_data[`${project.id}`].prefix[0];
+          }
+          this.downloadPresetByProject(item, project.id, projectPrefix);
+        }
+
       }
     },
     refreshPresetHeaders(){
@@ -300,13 +361,23 @@ export default {
         console.log('checking if project status is available:')
         console.log(projectItem)
         console.log(this.headers)
-        if (this.headers.filter(obj => obj.key === `status_${projectItem.id}`)){
+        console.log('1TESTING:')
+        console.log(this.headers.filter(obj => obj.key === `status_${projectItem.id}`))
+        if (this.headers.filter(obj => obj.key === `status_${projectItem.id}`).length === 0){
           this.headers.push({
-          title: `Status (${projectItem.name})`,
-          sortable: true,
-          key: `status_${projectItem.id}`,
-          align: 'end'
-        })
+            title: `Status (${projectItem.name})`,
+            sortable: true,
+            key: `status_${projectItem.id}`,
+            align: 'end',
+            width: '20px',
+          })
+          this.headers.push({
+            title: `Prefix (${projectItem.name})`,
+            sortable: true,
+            key: `prefix_${projectItem.id}`,
+            align: 'end',
+            width: 'auto',
+          })
         } else{
           console.log('project item already included')
           console.log(projectItem)
