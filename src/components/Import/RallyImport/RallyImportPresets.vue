@@ -21,7 +21,7 @@ v-card.w-100
     span.pl-5.pt-2 Loading..
     v-btn.ml-5(@click="stopLoading = true" :disabled="stopLoading" ) {{cancellingButton}}
   v-row
-    | {{this.selectedSilo}}
+    //| {{this.selectedSilo}}
     div(v-show="selectedPresets.length > 0").w-100
       v-row.mb-1.pb-1.pl-3
         v-col(cols="3")
@@ -67,8 +67,8 @@ v-card.w-100
           div(v-else-if="item.value[`status_${projectId}`] === 'different'" ).float-left
             v-icon(color="orange" ) fa-solid fa-triangle-exclamation
           div(v-else-if="item.value[`status_${projectId}`] === 'duplicate'" ).float-left
-            v-icon(color="red" ).pr-4 fa-solid fa-triangle-exclamation
-            v-icon(color="red" ) fa-solid fa-clone
+            v-icon(color="orange" ) fa-solid fa-triangle-exclamation
+            //v-icon(color="red" ) fa-solid fa-clone
 
           div(v-else-if="item.value[`status_${projectId}`] === 'downloading..'").float-left
             v-progress-circular(indeterminate color="primary" )
@@ -84,7 +84,7 @@ v-card.w-100
               span {{item.errorDetails || "unknown error"}}
 
           div(v-else)
-            span --{{ item.value[`status_${projectId}`]}}
+            v-icon(color="blue" ) fa-solid fa-question
 
 
 
@@ -209,6 +209,8 @@ export default {
     selectedProjectIds(newValue, oldValue){
       console.log(`Project selection changed: old -> ${oldValue}`);
       this.refreshPresetHeaders();
+      this.updateMessage = `Project list changed - ${this.getCurrentDate()}`;
+      this.presetList = [];
     }
   },
   methods: {
@@ -345,12 +347,17 @@ export default {
     refreshPresetHeaders(){
       this.headers = this.headers.filter(obj => {
         console.log(`checking: ${obj.key}`)
-        if (!obj.key.startsWith('status_')){
+        if (!obj.key.startsWith('status_') && !obj.key.startsWith('prefix_')){
           return true;
         }
         const searchedId = obj.key.replaceAll("status_", "");
         if (this.selectedProjectIds.includes(searchedId)){
           console.log(`value ${searchedId} found in selected projects`)
+          return true;
+        }
+        const searchedIdPrefix = obj.key.replaceAll("prefix_", "");
+        if (this.selectedProjectIds.includes(searchedIdPrefix)){
+          console.log(`value ${searchedIdPrefix} found in selected projects`)
           return true;
         }
         console.log(`field not found, deleting: ${obj.key}`)
@@ -375,8 +382,8 @@ export default {
             title: `Prefix (${projectItem.name})`,
             sortable: true,
             key: `prefix_${projectItem.id}`,
-            align: 'end',
-            width: 'auto',
+            align: 'left',
+            width: '20px',
           })
         } else{
           console.log('project item already included')

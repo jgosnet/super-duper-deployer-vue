@@ -7,8 +7,7 @@ export default {
     return api.get(url, {
         params: {
           silo_id: payload.silo_id,
-          preset_id: payload.preset_id,
-          project_id: 1
+          project_file_id: payload.preset_id
         }
       }
     )

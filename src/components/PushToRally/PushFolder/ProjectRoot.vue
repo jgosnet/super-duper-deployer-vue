@@ -12,15 +12,16 @@ v-card.w-100(density="compact" ).ma-0.pa-0
       v-btn(@click="refresh" v-show="!this.isLoading" ) Refresh Project
     v-row(v-for="subFolder in folders" :key="subFolder.dir_name" :folder="subFolder")
       ProjectFolder.pt-3.float-left.my-0(:dir_name="subFolder.dir_name"
+        :projectId="this.project.id"
         :id="subFolder.dir_name  + 'project'"
         :folders="subFolder.folders"
         :files="subFolder.files"
-        folder_path=""
+        folder_path="/"
         show=true,
         :showAll="this.showAll")
-        template(#refreshButton)
-          v-btn(@click="loadProjectStructure"
-            icon="fa-solid fa-arrows-rotate").float-right
+        //template(#refreshButton)
+        //  v-btn(@click="loadProjectStructure"
+        //    icon="fa-solid fa-arrows-rotate").float-right
 
 </template>
 

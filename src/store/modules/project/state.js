@@ -3,4 +3,5 @@ export default {
   projectsList: [],
   silosList: [],
   errorMessage: "",
+  project: {},
 }

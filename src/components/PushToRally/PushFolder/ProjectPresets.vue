@@ -1,5 +1,5 @@
 <template lang="pug">
-v-container(class="mx-1" fluid).preset
+v-container(class="mx-1" fluid).preset.ml-5
   v-row.mx-4.my-1
     h2.py-2.px-3.float-left(align="left") Presets
     v-btn.float-right(@click="refreshPresets()" size="x-small" icon="fa-solid fa-arrows-rotate")
@@ -17,7 +17,10 @@ v-container(class="mx-1" fluid).preset
   )
     template(v-slot:item.existsInSilo="{ item }")
       div.float-left
-        v-icon {{ item.existsInSilo ? "fa-solid fa-check" : "fa-solid fa-xmark" }}
+        | --{{item}}--
+        v-icon(v-if="item.existsInSilo === undefined" ) fa-solid fa-question
+        v-icon(v-else-if="!item.existsInSilo" ) fa-solid fa-xmark
+        v-icon(v-else) fa-solid fa-check
 
     template(v-slot:item.name="{ item }")
       div.float-left
@@ -208,10 +211,15 @@ export default {
 .preset{
   padding-top: 5px;
   padding-bottom: 5px;
+  padding-left: 5px;
+  margin-left: 5px;
   margin-top: 14px;
   margin-bottom: 14px;
 
-  background-color: lightgrey;
+  background-color: #F8F9F9;
+  border-style: dashed;
+  border-width: 2px;
+  border-radius: 5px;
   color: darkslategrey;
 }
 

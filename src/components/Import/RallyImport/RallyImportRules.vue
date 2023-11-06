@@ -21,7 +21,7 @@ v-card.w-100
     span.pl-5.pt-2 Loading..
     v-btn.ml-5(@click="stopLoading = true" :disabled="stopLoading" ) {{cancellingButton}}
   v-row
-    | {{this.selectedSilo}}
+    //| {{this.selectedSilo}}
     div(v-show="selectedRules.length > 0").w-100
       v-row.mb-1.pb-1.pl-3
         v-col(cols="3")
@@ -66,6 +66,9 @@ v-card.w-100
             v-icon(color="red" ) fa-solid fa-square-xmark
           div(v-else-if="item.value[`status_${projectId}`] === 'different'" ).float-left
             v-icon(color="orange" ) fa-solid fa-triangle-exclamation
+          div(v-else-if="item.value[`status_${projectId}`] === 'duplicate'" ).float-left
+            v-icon(color="orange" ) fa-solid fa-triangle-exclamation
+            //v-icon(color="red" ) fa-solid fa-clone
 
           div(v-else-if="item.value[`status_${projectId}`] === 'downloading..'").float-left
             v-progress-circular(indeterminate color="primary" )
@@ -81,7 +84,29 @@ v-card.w-100
               span {{item.errorDetails || "unknown error"}}
 
           div(v-else)
-            span {{ item.value[`status_${projectId}`]}}
+            span --{{ item.value[`status_${projectId}`]}}
+
+
+
+
+        template(v-for="projectId in this.selectedProjectIds"
+          v-slot:[`item.prefix_${projectId}`]="{ item }")
+          div(v-show="item.value[`prefix_${projectId}`].length > 0" )
+            span.pr-2 {{item.value[`prefix_${projectId}`].length}}
+            v-tooltip(left)
+              template(v-slot:activator="{ props }")
+                v-icon(v-bind="props" color="blue") fa-solid fa-folder-tree
+              div
+                div(v-for="linePrefix in item.value[`prefix_${projectId}`]")
+                  | {{linePrefix.path || '/'}}:
+                  b.pl-2 {{linePrefix.status || 'n/a'}}
+                  v-icon(v-if="linePrefix.status == different" color="red") fa-solid fa-file-circle-exclamation
+                  v-icon(v-if="linePrefix.status == same" color="green") fa-solid fa-file-circle-check
+          //template(v-slot:activator="{ props }")
+          //  v-icon(v-bind="props" color="blue")
+          //span test
+
+          //
 
 
         template(v-slot:item.name="{ item }")
@@ -110,7 +135,6 @@ export default {
       selectedImportProjects: [],
       downloadPrefix: "",
       selectedRules: [],
-      ruleInSiloClass: [],
       itemsPerPage: 10,
       isLoading: false,
       updateMessage: "Not loaded yet.",
@@ -191,16 +215,16 @@ export default {
       return new Date().toLocaleString();
     },
     async loadRules() {
-      this.presetList = [];
+
+      this.rulesList = [];
       this.stopLoading = false
-      this.selectedPresets = [];
+      this.selectedRules = [];
       this.isLoading = true;
       // first step: refresh the project
       this.updateMessage = `refreshing projects..`
       await this.refreshProjects(this.selectedProjectIds);
 
       this.updateMessage = `listing rules - ${this.getCurrentDate()}`
-
       let url = `silo/rules/list`
       this.isLoading = true
       let finished = false
@@ -230,8 +254,24 @@ export default {
       this.isLoading = false;
 
     },
+    async refreshProjects(projectIds){
+      for (const projectId of projectIds){
+        const url = `/project/${projectId}`
+        await api.get(url)
+          .then(() => {
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+          .finally(() => {
+            console.log(`refresh complete`)
+          })
+      }
+    },
+
     async getRulesByUrl(url, siloId, projectIds){
-      const response = api.get(url, {params: {silo_id: siloId, project_ids: projectIds.join(',')}})
+      let paramsData = {params: {silo_id: siloId, project_ids: projectIds.join(',')}}
+      const response = api.get(url, paramsData)
           .then((response) => {
             console.log("DATA")
             console.log(response.data)
@@ -244,7 +284,9 @@ export default {
                 last_update: new Date(x.last_update).toLocaleString(),
               }
               for (const projectItem of this.selectedProjects){
-                newRes[`status_${projectItem.id}`] = x.project_id_comparisons[projectItem.id]
+                newRes[`${projectItem.id}`] = x.projects_data[projectItem.id]
+                newRes[`prefix_${projectItem.id}`] = x.projects_data[projectItem.id].prefixes
+                newRes[`status_${projectItem.id}`] = x.projects_data[projectItem.id].status
               }
               this.rulesList.push(newRes);
             });
@@ -256,6 +298,7 @@ export default {
           .finally(() => {
             console.log(`${url} is complete`)
           })
+      this.ruleLoadingPromise = response
       return response
     },
 
@@ -265,7 +308,7 @@ export default {
       item[`status_${projectId}`] = "downloading.."
 
       const url = `silo/${this.selectedSilo.id}/download/${projectId}/rules/${item.id}`
-      await api.get(url, {params: {data:true}})
+      await api.get(url, {params: {prefix: prefix}})
           .then(() => {
             item[`status_${projectId}`] = "complete"
           })
@@ -287,11 +330,11 @@ export default {
       for (const item of currentSelection){
         console.log(item);
         for (const project of destinationProjects){
-          console.log(`downloading rule for project: ${project}`)
+          console.log(`downloading rules for project: ${project}`)
           let projectPrefix = definedPrefix;
           if (useExistingPrefix || !item.prefix){
             // eslint-disable-next-line no-unused-vars
-            projectPrefix = item.prefix;
+            projectPrefix = item.project_data[`${project.id}`].prefix[0];
           }
           this.downloadRuleByProject(item, project.id, projectPrefix);
         }
@@ -317,12 +360,21 @@ export default {
         console.log('checking if project status is available:')
         console.log(projectItem)
         console.log(this.headers)
-        if (this.headers.filter(obj => obj.key === `status_${projectItem.id}`)){
+        console.log('1TESTING:')
+        console.log(this.headers.filter(obj => obj.key === `status_${projectItem.id}`))
+        if (this.headers.filter(obj => obj.key === `status_${projectItem.id}`).length === 0){
           this.headers.push({
             title: `Status (${projectItem.name})`,
             sortable: true,
             key: `status_${projectItem.id}`,
             align: 'end',
+            width: '20px',
+          })
+          this.headers.push({
+            title: `Prefix (${projectItem.name})`,
+            sortable: true,
+            key: `prefix_${projectItem.id}`,
+            align: 'left',
             width: '20px',
           })
         } else{
