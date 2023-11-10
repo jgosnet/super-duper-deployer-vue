@@ -26,5 +26,8 @@ export default {
   },
   defaultImportPath(state){
     return state.defaultImportPath
+  },
+  preSelectedSilos(state){
+    return state.preSelectedSilos;
   }
 }

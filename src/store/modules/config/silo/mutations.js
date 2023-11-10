@@ -11,4 +11,10 @@ export default {
   addNewSiloToList(state, newSilo){
     state.silosList.push(newSilo)
   },
+  updatePreSelectedSilos(state, presetSelectedSilos){
+    state.preSelectedSilos = presetSelectedSilos;
+    console.log(presetSelectedSilos)
+    console.log(state.preSelectedSilos)
+
+  },
 }

@@ -8,6 +8,13 @@ v-card.w-100(density="compact" ).ma-0.pa-0
     v-row.my-4.mx-4(v-if="this.folders.length > 0")
       v-btn(@click="expandAll" v-if="this.showAll === false") Expand All
       v-btn(@click="collapseAll" v-if="this.showAll === true") Collapse All
+      v-combobox.pl-3.pr-3.combobox-spec(v-model="preSelectedSilos"
+        :items="this.selectedSiloNames"
+          label="Push to silo:"
+          multiple
+          clearable
+          chips)
+      //| --{{test}}--
     v-row.my-4.mx-4(v-else)
       v-btn(@click="refresh" v-show="!this.isLoading" ) Refresh Project
     v-row(v-for="subFolder in folders" :key="subFolder.dir_name" :folder="subFolder")
@@ -28,6 +35,7 @@ v-card.w-100(density="compact" ).ma-0.pa-0
 <script>
 import ProjectFolder from "@/components/PushToRally/PushFolder/ProjectFolder";
 import {api} from "@/scripts/axios_config";
+import {mapGetters} from "vuex";
 
 export default {
   name: "ProjectRoot",
@@ -44,7 +52,22 @@ export default {
       name: "",
       folders: "",
       isLoading: false,
-      showAll: false
+      showAll: false,
+      test: [],
+    }
+  },
+  computed: {
+    ...mapGetters('siloConfiguration', ['selectedSiloNames']),
+    preSelectedSilos: {
+      get(){
+        console.log(this.$store.getters['siloConfiguration/preSelectedSilos'])
+        return this.$store.getters['siloConfiguration/preSelectedSilos']
+      },
+      set(value){
+        console.log("attempting to update preselection")
+        console.log(value)
+        this.$store.dispatch('siloConfiguration/updatePreSelectedSilos', value)
+      }
     }
   },
   methods: {
@@ -84,6 +107,11 @@ export default {
 </script>
 
 <style scoped>
+.combobox-spec{
+  min-width: 300px;
+  max-width: 500px;
+}
+
 .v-card-actions{
   min-height: 30px !important;
 }

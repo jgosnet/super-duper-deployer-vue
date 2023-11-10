@@ -9,6 +9,9 @@ export default {
   updateErrorMessage(context, errorMessage){
     context.commit('updateErrorMessage', errorMessage)
   },
+  updatePreSelectedSilos(context, payload){
+    context.commit('updatePreSelectedSilos', payload)
+  },
   // SILOS Actions
   async loadSilosList(context) {
     const url = `config/silo`
@@ -100,35 +103,6 @@ export default {
       context.dispatch('updateDefaultImportPath', cachedDefaultImportPath);
     }
   },
-  // async addNewProject(context, payload) {
-  //   const url = `config/project/${payload.project_type}`
-  //   console.log(payload)
-  //   return api.post(url, payload)
-  //     .then((response) => {
-  //       console.log(response.statusText)
-  //       if (response.statusText === 'CREATED'){
-  //         payload.id = response.data.id
-  //         payload.type = payload.project_type
-  //         payload.path = payload.local_path
-  //         console.log(payload)
-  //         console.log(`added project: ${payload.id}`)
-  //         context.commit('addNewProjectToList', payload)
-  //         return true
-  //       }
-  //       return false
-  //     })
-  //     .catch((error) => {
-  //       console.log(error)
-  //       const errorMessage = 'Failed to add project'
-  //       context.dispatch('snackbar/showMessage', {
-  //           message: errorMessage
-  //         },
-  //         { root: true }
-  //       )
-  //     })
-  //     .finally(() => {
-  //     })
-  // },
   async addNewSilo(context, payload) {
     const url = `config/silo`
     console.log(payload)

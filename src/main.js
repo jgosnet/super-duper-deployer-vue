@@ -44,11 +44,19 @@ const vuetify = createVuetify({
 
 
 import {router} from "@/router"
-
+import { basicSetup } from 'codemirror'
+import VueCodemirror from 'vue-codemirror'
 
 export const Vue = createApp(App)
   .use(vuetify)
   .use(router)
+  .use(VueCodemirror, {
+    autofocus: true,
+    disabled: false,
+    indentWithTab: true,
+    tabSize: 2,
+    extensions: [basicSetup],
+  })
   .use(store)
   .use(VueCookies)
   .use(VueDiff, {

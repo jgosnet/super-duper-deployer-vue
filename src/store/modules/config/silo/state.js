@@ -3,4 +3,5 @@ export default {
   errorMessage: "",
   isLoading: false,
   failedToLoad: false,
+  preSelectedSilos: [],
 }

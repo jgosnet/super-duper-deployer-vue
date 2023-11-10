@@ -1,11 +1,35 @@
 <template lang="pug">
 v-container(class="mx-1" fluid).preset.ml-5
+  //| {{selectedSilos}}
   v-row.mx-4.my-1
     h2.py-2.px-3.float-left(align="left") Presets
     v-btn.float-right(@click="refreshPresets()" size="x-small" icon="fa-solid fa-arrows-rotate")
+    div(v-if="this.selectedPresets.length > 0" )
+      v-btn.ml-3(prepend-icon="fa-solid fa-file-arrow-down" @click="uploadDialog = true"
+      :disabled="this.preSelectedSilos.length == 0").ml-5 Push selection
+      div(v-show="this.preSelectedSilos.length == 0" )
+        span.text-red() Please select a silo first
+      v-dialog(v-model="uploadDialog"
+            width="auto"
+            min-width="500" )
+        template(v-slot:activator="{ props }")
+        v-card
+          v-card-title
+            | Push presets to
+            b.pl-2 {{formattedSiloSelection}}
+          v-card-text
+            | You 'bout to push some presets to a silo mate, ya sure 'bout dat ?
+            ul
+              li(v-for="item in this.selectedPresets" :key="item.id")
+                | {{item.name}}
+          v-card-actions
+            v-spacer
+            v-btn(color="primary" @click="uploadDialog = false") Cancel
+            v-btn(color="primary"  @click="uploadSelection") Confirm
   v-row
   v-data-table(
     v-model:items-per-page="itemsPerPage"
+    v-model="selectedPresets"
     :headers="presetHeaders"
     :items="localPresetsList"
     item-value="name"
@@ -14,10 +38,11 @@ v-container(class="mx-1" fluid).preset.ml-5
     :item-class="presetInSiloClass"
     color="grey-lighten-4"
     show-select
+    return-object
   )
     template(v-slot:item.existsInSilo="{ item }")
       div.float-left
-        | --{{item}}--
+        //| --{{item}}--
         v-icon(v-if="item.existsInSilo === undefined" ) fa-solid fa-question
         v-icon(v-else-if="!item.existsInSilo" ) fa-solid fa-xmark
         v-icon(v-else) fa-solid fa-check
@@ -25,14 +50,44 @@ v-container(class="mx-1" fluid).preset.ml-5
     template(v-slot:item.name="{ item }")
       div.float-left
         //v-icon(color="blue" class="pr-4") fa-solid fa-circle-info
-        span {{item.value }}
+        ProjectPresetDetails.float-left.pr-2(:presetDetails="item.value" )
+        | {{item.value.name }}
+
 
     template(v-for="selectedSilo in this.selectedSilos"
-      v-slot:[`item.silo_${selectedSilo.name}`]="{ item }")
-      div(v-if="item === 'loading'" )
-        v-icon(icon="fa-solid fa-spinner")
+      v-slot:[`item.silo_${selectedSilo.id}`]="{ item }")
+      div(v-if="item.value[`status_${selectedSilo.id}`] === 'downloading' || !item.value[`status_${selectedSilo.id}`]" )
+        v-progress-circular(indeterminate color="blue" size="small" )
+        //v-icon(icon="fa-solid fa-spinner" color="blue" )
+      div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'complete' || item.value[`status_${selectedSilo.id}`] === 'same'" )
+        v-icon(icon="fa-solid fa-square-check" color="green" )
+      div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'duplicate'" )
+        v-icon(icon="fa-solid fa-paste" color="red" )
+      div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'updated'" )
+        v-icon(icon="fa-solid fa-file-export" color="blue" )
+      div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'error'" )
+        v-tooltip(activator="parent" location="top") Failed to push
+          template(v-slot:activator="{ on, attrs }")
+            v-icon(icon="fa-solid fa-circle-exclamation" color="red" )
+
+      div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'different'" )
+        //| -{{item.value[`silo_${selectedSilo.id}`]}}-
+        //| +{{item.value[`status_${selectedSilo.id}`]}}+
+        v-tooltip(activator="parent" location="top")
+          div
+            | Preset config:
+            v-icon(v-if="!item.value[`silo_${selectedSilo.id}`].preset_data_diff" icon="fa-solid fa-square-check" color="green" )
+            v-icon(v-else icon="fa-solid fa-triangle-exclamation" color="red" )
+            br
+            | Rally config:
+            v-icon(v-if="!item.value[`silo_${selectedSilo.id}`].config_data_diff" icon="fa-solid fa-square-check" color="green" )
+            v-icon(v-else icon="fa-solid fa-triangle-exclamation" color="red" )
+          template(v-slot:activator="{ on, attrs }")
+            v-icon(icon="fa-solid fa-triangle-exclamation" color="orange" )
+
       div(v-else)
-        v-icon(v-if="item.exists_in_silo"
+        | --{{item.value[`status_${selectedSilo.id}`]}}--
+        v-icon(v-if="item.value[`silo_${selectedSilo.id}`].exists_in_silo"
           icon="fa-regular fa-square-check"
           color="green" )
         div(v-else)
@@ -50,20 +105,28 @@ v-container(class="mx-1" fluid).preset.ml-5
 import { VDataTable } from 'vuetify/labs/VDataTable'
 
 import {mapGetters} from "vuex";
+import {api} from "@/scripts/axios_config";
+import ProjectPresetDetails from "@/components/PushToRally/PushFolder/ProjectPresetDetails";
 
 export default {
   name: "ProjectPresets",
   components:{
+    ProjectPresetDetails,
     VDataTable
   },
   computed: {
-    ...mapGetters('siloConfiguration', ['selectedSilos']),
+    ...mapGetters('siloConfiguration', ['selectedSilos', 'preSelectedSilos']),
+    formattedSiloSelection(){
+      return `[${this.preSelectedSilos.join(", ")}]`
+    }
   },
   props: {
     presetsList: Array,
   },
   data() {
     return {
+      uploadDialog: false,
+      selectedPresets: [],
       itemsPerPage: 5,
       baseHeaders: [
           {
@@ -90,6 +153,53 @@ export default {
     }
   },
   methods: {
+    async uploadSelection(){
+      // set the parameters
+      const currentSelection = this.selectedPresets;
+      for (const item of currentSelection){
+        console.log(item);
+        console.log(this.preSelectedSilos);
+        for (const currentSilo of this.preSelectedSilos){
+          console.log(`pushing to silo: ${currentSilo}`)
+          const currentSiloId = this.selectedSilos.find(obj => obj.name === currentSilo).id
+          console.log("currentSiloId: ")
+          console.log(currentSiloId)
+          this.uploadPresetBySilo(this.localPresetsList.find(obj => obj.id === item.id), currentSiloId);
+        }
+      }
+      this.$store.dispatch('snackbar/showMessage', {
+            message: "Push request complete"
+          },
+          { root: true }
+      )
+      this.uploadDialog = false;
+      this.selectedPresets = [];
+    },
+    async uploadPresetBySilo(item, siloId) {
+      console.log(`downloading preset ${item} for project: ${siloId}`)
+      console.log(`status_${siloId}`)
+      item[`status_${siloId}`] = "downloading"
+
+      const url = `silo/presets/upload`
+      console.log(url, api)
+      api.post(url, [
+        {
+          "silo_id": siloId,
+          "project_file_id": item.id,
+        }
+      ])
+          .then(() => {
+            item[`status_${siloId}`] = "updated"
+          })
+          .catch((error) => {
+            console.log(error)
+            item[`status_${siloId}`] = "error"
+          })
+          .finally(() => {
+            console.log(`Download attempt complete for ${item}`)
+          })
+
+    },
     getSlotName(name){
       return `silo_${name}`
     },
@@ -106,11 +216,12 @@ export default {
         console.log(`detected: `)
         console.log(item)
         if (this.presetHeaders.find(obj => obj.key === `silo_${item.name}`) === undefined){
+          console.log(`Adding header: ${item.name} silo_${item.id}`)
           this.presetHeaders.push({
           title: item.name,
           align: 'start',
           sortable: false,
-          key: `silo_${item.name}`
+          key: `silo_${item.id}`
         })
         }
       }
@@ -163,7 +274,7 @@ export default {
           lastModified: item['modified'],
         }
         for (const silo of this.selectedSilos){
-          newPreset[`silo_${silo.name}`] = "loading"
+          newPreset[`silo_${silo.id}`] = "loading"
           this.updatePresetStatus(newPreset.id, silo.name, silo.id)
           // newPreset[`silo_${silo.name}`] = test_resp
           // console.log(`resp => ${test_resp}`)
@@ -184,8 +295,17 @@ export default {
       console.log(`new status = `)
       console.log(newStatus)
       let item = this.localPresetsList.find(obj => obj.id == item_id)
-      console.log(this.getSlotName(silo_name))
-      item[this.getSlotName(silo_name)] = newStatus
+      console.log(this.getSlotName(silo_id))
+      item[this.getSlotName(silo_id)] = newStatus
+      if (!newStatus.exists_in_silo){
+        item[`status_${silo_id}`] = "missing"
+      } else{
+        if (newStatus.config_data_diff || newStatus.preset_data_diff){
+          item[`status_${silo_id}`] = "different"
+        } else{
+          item[`status_${silo_id}`] = "same"
+        }
+      }
       console.log("wait ended")
     },
   },

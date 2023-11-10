@@ -74,6 +74,11 @@ export default {
 </script>
 
 <style>
+.cm-editor{
+  min-height: 300px !important;
+  max-height: 720px !important;
+}
+
 body{
   position: relative;
   background: linear-gradient(45deg, #5757D9 0%, #21D9F7 100%);

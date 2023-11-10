@@ -27,7 +27,9 @@ v-card.w-100
         v-col(cols="3")
           v-btn(
             prepend-icon="fa-solid fa-file-arrow-down"
-            @click="downloadSelection").ml-5 Download selection
+            @click="downloadSelection" :disabled="this.selectedImportProjects.length == 0").ml-5 Download selection
+          div(v-show="this.selectedImportProjects.length == 0" )
+            span.text-red Please select a project first
         v-col(cols="4")
           v-text-field.pl-3(prepend-icon="fa-solid fa-folder-tree" hide-details
           clearable label="Prefix" v-model="downloadPrefix" density="compact")
@@ -67,7 +69,7 @@ v-card.w-100
           div(v-else-if="item.value[`status_${projectId}`] === 'different'" ).float-left
             v-icon(color="orange" ) fa-solid fa-triangle-exclamation
           div(v-else-if="item.value[`status_${projectId}`] === 'duplicate'" ).float-left
-            v-icon(color="orange" ) fa-solid fa-triangle-exclamation
+            v-icon(color="orange" ) fa-solid fa-paste
             //v-icon(color="red" ) fa-solid fa-clone
 
           div(v-else-if="item.value[`status_${projectId}`] === 'downloading..'").float-left
@@ -76,6 +78,9 @@ v-card.w-100
           div(v-else-if="item.value[`status_${projectId}`] === 'complete'\
               || item.value[`status_${projectId}`] === 'same'").float-left
             v-icon(color="green" ) fa-solid fa-file-circle-check
+
+          div(v-else-if="item.value[`status_${projectId}`] === 'imported'").float-left
+            v-icon(color="blue" ) fa-solid fa-file-import
 
           div(v-else-if="item.value[`status_${projectId}`] === 'error'").float-left
             v-tooltip(left)
@@ -313,7 +318,7 @@ export default {
       const url = `silo/${this.selectedSilo.id}/download/${projectId}/presets/${item.id}`
       await api.get(url, {params: {prefix: prefix}})
           .then(() => {
-            item[`status_${projectId}`] = "complete"
+            item[`status_${projectId}`] = "imported"
           })
           .catch((error) => {
             console.log(error)
@@ -331,15 +336,24 @@ export default {
       const destinationProjects = this.selectedImportProjects;
       const currentSelection = this.selectedPresets;
       for (const item of currentSelection){
-        console.log(item);
         for (const project of destinationProjects){
           console.log(`downloading preset for project: ${project}`)
+          console.log(project)
+          console.log(item)
           let projectPrefix = definedPrefix;
-          if (useExistingPrefix || !item.prefix){
+          if (useExistingPrefix && item[project.id].prefixes.length > 0){
             // eslint-disable-next-line no-unused-vars
-            projectPrefix = item.project_data[`${project.id}`].prefix[0];
+            projectPrefix = item[project.id].prefixes[0].path;
+          }
+          if (!projectPrefix.startsWith("/")){
+            projectPrefix = `/${projectPrefix}`
           }
           this.downloadPresetByProject(item, project.id, projectPrefix);
+          this.$store.dispatch('snackbar/showMessage', {
+                message: "Download request complete"
+              },
+              { root: true }
+          )
         }
 
       }
