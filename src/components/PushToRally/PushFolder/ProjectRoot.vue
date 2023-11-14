@@ -23,7 +23,7 @@ v-card.w-100(density="compact" ).ma-0.pa-0
         :id="subFolder.dir_name  + 'project'"
         :folders="subFolder.folders"
         :files="subFolder.files"
-        folder_path="/"
+        folder_path=""
         show=true,
         :showAll="this.showAll")
         //template(#refreshButton)

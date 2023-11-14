@@ -27,7 +27,9 @@ v-card.w-100
         v-col(cols="3")
           v-btn(
             prepend-icon="fa-solid fa-file-arrow-down"
-            @click="downloadSelection").ml-5 Download selection
+            @click="downloadSelection" :disabled="this.selectedImportProjects.length == 0").ml-5 Download selection
+          div(v-show="this.selectedImportProjects.length == 0" )
+            span.text-red Please select a project first
         v-col(cols="4")
           v-text-field.pl-3(prepend-icon="fa-solid fa-folder-tree" hide-details
           clearable label="Prefix" v-model="downloadPrefix" density="compact")
@@ -53,7 +55,7 @@ v-card.w-100
         show-select
         v-model:items-per-page="itemsPerPage"
         :headers="headers"
-        :items="rulesList"
+        :items="presetList"
         item-value="id"
         class="elevation-1"
         density="compact"
@@ -67,7 +69,7 @@ v-card.w-100
           div(v-else-if="item.value[`status_${projectId}`] === 'different'" ).float-left
             v-icon(color="orange" ) fa-solid fa-triangle-exclamation
           div(v-else-if="item.value[`status_${projectId}`] === 'duplicate'" ).float-left
-            v-icon(color="orange" ) fa-solid fa-triangle-exclamation
+            v-icon(color="orange" ) fa-solid fa-paste
             //v-icon(color="red" ) fa-solid fa-clone
 
           div(v-else-if="item.value[`status_${projectId}`] === 'downloading..'").float-left
@@ -77,6 +79,9 @@ v-card.w-100
               || item.value[`status_${projectId}`] === 'same'").float-left
             v-icon(color="green" ) fa-solid fa-file-circle-check
 
+          div(v-else-if="item.value[`status_${projectId}`] === 'imported'").float-left
+            v-icon(color="blue" ) fa-solid fa-file-import
+
           div(v-else-if="item.value[`status_${projectId}`] === 'error'").float-left
             v-tooltip(left)
               template(v-slot:activator="{ props }")
@@ -84,7 +89,7 @@ v-card.w-100
               span {{item.errorDetails || "unknown error"}}
 
           div(v-else)
-            span --{{ item.value[`status_${projectId}`]}}
+            v-icon(color="blue" ) fa-solid fa-question
 
 
 
@@ -135,11 +140,12 @@ export default {
       selectedImportProjects: [],
       downloadPrefix: "",
       selectedRules: [],
+      presetInSiloClass: [],
       itemsPerPage: 10,
       isLoading: false,
       updateMessage: "Not loaded yet.",
       search: '',
-      rulesList: [
+      presetList: [
         // {"name": "test", "id": 1, 'provider_type': "Decision Engine", "status": "complete"},
         // {"name": "test", "id": 1, 'provider_type': "Decision Engine", "status": "complete"},
         // {"name": "test", "id": 1, 'provider_type': "Decision Engine", "status": "downloading.."},
@@ -207,7 +213,9 @@ export default {
   watch: {
     selectedProjectIds(newValue, oldValue){
       console.log(`Project selection changed: old -> ${oldValue}`);
-      this.refreshHeaders();
+      this.refreshPresetHeaders();
+      this.updateMessage = `Project list changed - ${this.getCurrentDate()}`;
+      this.presetList = [];
     }
   },
   methods: {
@@ -216,7 +224,7 @@ export default {
     },
     async loadRules() {
 
-      this.rulesList = [];
+      this.presetList = [];
       this.stopLoading = false
       this.selectedRules = [];
       this.isLoading = true;
@@ -288,7 +296,7 @@ export default {
                 newRes[`prefix_${projectItem.id}`] = x.projects_data[projectItem.id].prefixes
                 newRes[`status_${projectItem.id}`] = x.projects_data[projectItem.id].status
               }
-              this.rulesList.push(newRes);
+              this.presetList.push(newRes);
             });
             return response.data
           })
@@ -298,19 +306,19 @@ export default {
           .finally(() => {
             console.log(`${url} is complete`)
           })
-      this.ruleLoadingPromise = response
+      this.presetLoadingPromise = response
       return response
     },
 
-    async downloadRuleByProject(item, projectId, prefix) {
-      console.log(`downloading rule ${item.name} for project: ${projectId} (${prefix})`)
+    async downloadPresetByProject(item, projectId, prefix) {
+      console.log(`downloading preset ${item.name} for project: ${projectId} (${prefix})`)
       console.log(item)
       item[`status_${projectId}`] = "downloading.."
 
       const url = `silo/${this.selectedSilo.id}/download/${projectId}/rules/${item.id}`
       await api.get(url, {params: {prefix: prefix}})
           .then(() => {
-            item[`status_${projectId}`] = "complete"
+            item[`status_${projectId}`] = "imported"
           })
           .catch((error) => {
             console.log(error)
@@ -328,28 +336,42 @@ export default {
       const destinationProjects = this.selectedImportProjects;
       const currentSelection = this.selectedRules;
       for (const item of currentSelection){
-        console.log(item);
         for (const project of destinationProjects){
-          console.log(`downloading rules for project: ${project}`)
+          console.log(`downloading preset for project: ${project}`)
+          console.log(project)
+          console.log(item)
           let projectPrefix = definedPrefix;
-          if (useExistingPrefix || !item.prefix){
+          if (useExistingPrefix && item[project.id].prefixes.length > 0){
             // eslint-disable-next-line no-unused-vars
-            projectPrefix = item.project_data[`${project.id}`].prefix[0];
+            projectPrefix = item[project.id].prefixes[0].path;
           }
-          this.downloadRuleByProject(item, project.id, projectPrefix);
+          if (!projectPrefix.startsWith("/")){
+            projectPrefix = `/${projectPrefix}`
+          }
+          this.downloadPresetByProject(item, project.id, projectPrefix);
+          this.$store.dispatch('snackbar/showMessage', {
+                message: "Download request complete"
+              },
+              { root: true }
+          )
         }
 
       }
     },
-    refreshHeaders(){
+    refreshPresetHeaders(){
       this.headers = this.headers.filter(obj => {
         console.log(`checking: ${obj.key}`)
-        if (!obj.key.startsWith('status_')){
+        if (!obj.key.startsWith('status_') && !obj.key.startsWith('prefix_')){
           return true;
         }
         const searchedId = obj.key.replaceAll("status_", "");
         if (this.selectedProjectIds.includes(searchedId)){
           console.log(`value ${searchedId} found in selected projects`)
+          return true;
+        }
+        const searchedIdPrefix = obj.key.replaceAll("prefix_", "");
+        if (this.selectedProjectIds.includes(searchedIdPrefix)){
+          console.log(`value ${searchedIdPrefix} found in selected projects`)
           return true;
         }
         console.log(`field not found, deleting: ${obj.key}`)
@@ -385,7 +407,7 @@ export default {
     },
   },
   mounted() {
-    this.refreshHeaders();
+    this.refreshPresetHeaders();
   }
 }
 </script>

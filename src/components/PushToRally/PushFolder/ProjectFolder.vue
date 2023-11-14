@@ -20,17 +20,24 @@ v-card.my-0.py-0(class="w-100 mb-0"
 
   v-expand-transition
     div(v-show="localShow && (localFolders.length > 0 || this.computedPresets.length > 0)")
-      v-divider
-      v-row(v-if="this.computedPresets && this.computedPresets.length > 0").w-100
-        ProjectPresets(:presetsList="this.computedPresets").w-100
+      div(v-if="this.computedPresets && this.computedPresets.length > 0")
+        v-divider
+        v-row.w-100
+          ProjectPresets(:presetsList="this.computedPresets").w-100
+
+      div(v-if="this.computedRules && this.computedRules.length > 0")
+        v-divider
+        v-row.w-100
+          ProjectRules(:rulesList="this.computedRules").w-100
       v-divider
       v-card-text(height="50%")
         v-row(v-for="subFolder in localFolders" :key="dir_name + subFolder.name" :folder="subFolder")
           ProjectFolder.ml-10(:dir_name="subFolder.dir_name"
+            :projectId="this.projectId"
             :folders="subFolder.folders"
             :files="subFolder.files"
             :id="folder_path + '/' + subFolder.dir_name + 'project'"
-            :folder_path="folder_path + '/' + subFolder.dir_name"
+            :folder_path="subFolder.dir_name + '/'"
             show=false
             :show-all="this.showAll")
 
@@ -41,10 +48,11 @@ v-card.my-0.py-0(class="w-100 mb-0"
 import ProjectPresets from "@/components/PushToRally/PushFolder/ProjectPresets";
 import {mapGetters} from "vuex";
 import {api} from "@/scripts/axios_config";
+import ProjectRules from "@/components/PushToRally/PushFolder/ProjectRules";
 
 export default {
   name: "ProjectFolder",
-  components: {ProjectPresets},
+  components: {ProjectRules, ProjectPresets},
   computed:{
     ...mapGetters('siloConfiguration', ['selectedSiloNames']),
     computedPresets(){
@@ -53,6 +61,20 @@ export default {
         return []
       }
       return this.files.filter(obj => obj['type'] === 'preset')
+    },
+    computedFiles(){
+      console.log(`computed files: ${this.files}`)
+      if (this.files == undefined){
+        return []
+      }
+      return this.files.filter(obj => obj['type'] === 'file')
+    },
+    computedRules(){
+      console.log(`computed rules: ${this.files}`)
+      if (this.files == undefined){
+        return []
+      }
+      return this.files.filter(obj => obj['type'] === 'rule')
     }
   },
   props: {
@@ -77,20 +99,29 @@ export default {
     },
     refreshFolder(){
       const url = `project/${this.projectId}?prefix=${this.folder_path}`
+      console.log(this.folders)
       api.get(url, { params: { refresh: true}})
-      .then((response) => {
-        if (response.statusText === 'OK'){
-          console.log("project loaded")
-          // eslint-disable-next-line vue/no-mutating-props
-          this.folders = response.data
-          console.log(this.folders)
-          return response.data
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-        // eslint-disable-next-line vue/no-mutating-props
-      })
+          .then((response) => {
+            if (response.statusText === 'OK'){
+              console.log("project loaded")
+              if (response.data.length > 0){
+                console.log(response.data[0])
+                console.log(response.data[0].folders)
+                // eslint-disable-next-line vue/no-mutating-props
+                this.localFolders = response.data[0].folders
+                console.log(response)
+                console.log(this.localFolders)
+              } else{
+                console.log(`Folder is empty`)
+              }
+
+              return response.data
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            // eslint-disable-next-line vue/no-mutating-props
+          })
       .finally(() => {
         // this.isLoading = false
       })

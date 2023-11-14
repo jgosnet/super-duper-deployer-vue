@@ -36,7 +36,7 @@ v-row
               input(type="checkbox" v-model="element.isSelected").float-right
 
             v-card-text
-              | {{element}}
+              //| {{element}}
               v-row.pt-2.px-5
                 span.font-weight-bold ID:
                 span.font-weight-medium.pl-2 {{element.id}}

@@ -86,7 +86,7 @@ v-container(class="mx-1" fluid).preset.ml-5
             v-icon(icon="fa-solid fa-triangle-exclamation" color="orange" )
 
       div(v-else)
-        | --{{item.value[`status_${selectedSilo.id}`]}}--
+        //| --{{item.value[`status_${selectedSilo.id}`]}}--
         v-icon(v-if="item.value[`silo_${selectedSilo.id}`].exists_in_silo"
           icon="fa-regular fa-square-check"
           color="green" )
