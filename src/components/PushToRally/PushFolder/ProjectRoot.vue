@@ -5,7 +5,7 @@ v-card.w-100(density="compact" ).ma-0.pa-0
         color="primary")
   v-card-text.pt-0.mt-0.pa-1(v-else)
     //v-btn.my-4(@click="loadProjectStructure" align="left" text-align="left") refresh
-    v-row.my-4.mx-4(v-if="this.folders.length > 0")
+    v-row.mt-4.mx-4(v-if="this.folders.length > 0")
       v-btn(@click="expandAll" v-if="this.showAll === false") Expand All
       v-btn(@click="collapseAll" v-if="this.showAll === true") Collapse All
       v-combobox.pl-3.pr-3.combobox-spec(v-model="preSelectedSilos"
@@ -17,8 +17,13 @@ v-card.w-100(density="compact" ).ma-0.pa-0
       //| --{{test}}--
     v-row.my-4.mx-4(v-else)
       v-btn(@click="refresh" v-show="!this.isLoading" ) Refresh Project
+    v-row.my-0.mx-4
+      v-checkbox.pl-3(label="Show generic files (that are not preset/rules)"
+            v-model="showFiles" density="compact" hide-details)
     v-row(v-for="subFolder in folders" :key="subFolder.dir_name" :folder="subFolder")
-      ProjectFolder.pt-3.float-left.my-0(:dir_name="subFolder.dir_name"
+      ProjectFolder.pt-3.float-left.my-0(@update-files="updateFiles"
+        :show-files="showFiles"
+        :dir_name="subFolder.dir_name"
         :projectId="this.project.id"
         :id="subFolder.dir_name  + 'project'"
         :folders="subFolder.folders"
@@ -49,8 +54,9 @@ export default {
   },
   data() {
     return {
+      showFiles: false,
       name: "",
-      folders: "",
+      folders: [],
       isLoading: false,
       showAll: false,
       test: [],
@@ -71,6 +77,10 @@ export default {
     }
   },
   methods: {
+    updateFiles(value){
+      console.log(`Root, no update needed!`);
+      this.folders[0].files = value.files;
+    },
     refresh(){
       this.loadProjectStructure()
     },

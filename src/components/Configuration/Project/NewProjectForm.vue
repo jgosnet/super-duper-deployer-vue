@@ -61,6 +61,10 @@ export default {
     ...mapGetters('projectConfiguration', ['selectedProjectNames', 'errorMessage']),
   },
   methods: {
+    sleep(ms){
+      console.log("sleeping")
+      return new Promise(resolve => setTimeout(resolve, ms))
+    },
     async submit() {
       console.log(`STATUS OF VALIDATION: ${this.isFormValid}`)
       this.isLoading = true;
@@ -69,8 +73,12 @@ export default {
         project_type: this.projectType,
         local_path: this.filepath
       };
+      console.log("adding project")
       await this.$store.dispatch('projectConfiguration/addNewProject', payload);
-      await this.$store.dispatch('configuration/loadConfiguration', payload);
+      console.log("added project, refreshing now")
+      await this.sleep(1000)
+      await this.$store.dispatch('projectConfiguration/loadProjectsList', payload);
+      console.log("reloaded project")
       this.isLoading = false;
       this.dialog = false;
 

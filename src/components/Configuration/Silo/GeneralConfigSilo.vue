@@ -53,7 +53,7 @@ v-row
 import draggable from "vuedraggable";
 import {mapGetters} from "vuex";
 import ConfirmDialog from "@/components/utils/ConfirmDialog";
-import NewSiloForm from "@/components/PushToRally/Forms/Silo/NewSiloForm";
+import NewSiloForm from "@/components/Configuration/Silo/NewSiloForm";
 
 export default {
   name: "GeneralSiloProject",

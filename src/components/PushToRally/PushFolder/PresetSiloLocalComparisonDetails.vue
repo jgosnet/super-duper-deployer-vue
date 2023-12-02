@@ -1,15 +1,36 @@
 <template lang="pug">
-v-tabs(v-model="selectedTab")
+v-tabs(v-model="selectedTab").w-100
   v-tab(value="providerdata")
     | Provider Data
   v-tab(value="rallyconfig")
     | Rally Config
 
 v-window(v-model="selectedTab" ).w-100
-  v-window-item(value="providerdata" )
-    | provider data
-  v-window-item(value="rallyconfig" )
-    | rallyconfig
+  div.py-2
+    i Last modified date:
+    b.pl-2 {{ remoteDate }}
+    v-checkbox.float-right.pl-3(label="Show differences"
+            v-model="showDiff" density="compact" hide-details)
+  v-window-item(value="providerdata" ).w-100
+    //| {{this.presetDetails.remote.config_data}}
+    div(v-if="showDiff" )
+      span.float-left.pt-0.mt-0 Local
+      span.float-right.pt-0.mt-0 Silo data
+      br.mt-0.pt-0
+      code-diff(:old-string="localCode"
+              :new-string="remoteCode"
+              output-format="side-by-side"
+      )
+    code-mirror.w-100.CodeMirror(v-else
+    v-model="remoteCode"
+      basic
+      :lang="lang"
+    )
+  v-window-item(value="rallyconfig" ).w-100
+    code-mirror.w-100.CodeMirror(v-model="remoteRallyConfig"
+      basic
+      :lang="lang"
+    )
 </template>
 
 <script>
@@ -25,12 +46,29 @@ export default {
   },
   computed: {
     ...mapGetters('siloConfiguration', ['selectedSilos', 'preSelectedSilos']),
+    remoteDate(){
+      if (this.presetDetails.remote.modified == undefined){
+        return "n/a"
+      }
+      const modifiedDate = new Date(this.presetDetails.remote.modified);
+      return modifiedDate.toLocaleString()
+    },
+    localCode(){
+      return this.presetDetails.local.preset_data;
+    },
+    remoteCode(){
+      return this.presetDetails.remote.preset_data;
+    },
+    remoteRallyConfig(){
+      return this.presetDetails.remote.config_data;
+    }
   },
   props:{
     presetDetails: Object,
   },
   data() {
     return {
+      showDiff: false,
       detailDialog: false,
       lang: python(),
       linter: null,
@@ -42,5 +80,11 @@ export default {
 </script>
 
 <style scoped>
-
+.CodeMirror {
+  border: 1px solid #eee;
+  min-height: 300px;
+  /*max-height: 300px;*/
+  text-align: left;
+  margin-bottom: 10px;
+}
 </style>

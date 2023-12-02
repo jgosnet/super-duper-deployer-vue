@@ -5,7 +5,6 @@ import {api} from "@/scripts/axios_config";
 export default {
   async loadProjectsList(context) {
     const url = `config/project`;
-    console.log("LOADING ?")
     context.commit('updateIsLoading', true);
     context.commit('updateErrorMessage', "");
     return api.get(url)
@@ -16,22 +15,15 @@ export default {
           // 2\ insert remaining items
           // update vuex
           let newProjectsList = []
-          console.log(`getting projects list..`)
           if (cookie.isKey('selectedProjects')){
-            console.log(`Cookies found for: selectedProjects`)
             const cachedProjectsList = JSON.parse(JSON.stringify(cookie.get('selectedProjects')));
-            console.log(cachedProjectsList)
             for (const cachedProject of cachedProjectsList){
-              console.log(`cached project:`)
-              console.log(cachedProject)
               const filteredArray = response.data.filter((project) => cachedProject.id == project.uuid);
               if (filteredArray.length > 0){
                 newProjectsList.push(cachedProject)
               }
             }
           }
-          console.log(`Cached projects loaded: `)
-          console.log(newProjectsList)
           for (let obj of response.data){
             const filteredArray = newProjectsList.filter((project) => project.id == obj.uuid);
             if (filteredArray.length === 0){
@@ -45,12 +37,11 @@ export default {
             }
           }
           context.commit('updateProjectsList', newProjectsList)
-          return response.data
+          console.log("DATA UPDATED")
+
         }
-        console.log(response.data)
       })
-      .catch((error) => {
-        console.log(error)
+      .catch(() => {
         const errorMessage = 'Failed to get the project list from server'
         context.dispatch('snackbar/showMessage', {
             message: errorMessage
@@ -75,10 +66,8 @@ export default {
           context.dispatch('loadProjectsList')
           return
         }
-        console.log(response.data)
       })
-      .catch((error) => {
-        console.log(error)
+      .catch(() => {
         const errorMessage = `Failed to delete the project: ${projectId}`
         context.dispatch('snackbar/showMessage', {
             message: errorMessage
@@ -92,24 +81,19 @@ export default {
   },
   async addNewProject(context, payload) {
     const url = `config/project/${payload.project_type}`
-    console.log(payload)
     api.post(url, payload)
       .then((response) => {
-        console.log(response.statusText)
         if (response.statusText === 'CREATED'){
           payload.id = response.data.id
           payload.type = payload.project_type
           payload.path = payload.local_path
-          console.log(payload)
-          console.log(`added project: ${payload.id}`)
-          context.commit('addNewProjectToList', payload)
+          // context.commit('addNewProjectToList', payload)
           return true
         }
         return false
       })
       .catch((error) => {
-        console.log(error)
-        const errorMessage = 'Failed to add project'
+        const errorMessage = `Failed to add project (${error.response.data})`
         context.dispatch('snackbar/showMessage', {
             message: errorMessage
           },

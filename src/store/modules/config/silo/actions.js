@@ -60,7 +60,7 @@ export default {
           },
           { root: true }
         )
-        context.commit('updateSiloErrorMessage', errorMessage)
+        context.commit('updateErrorMessage', errorMessage)
       })
       .finally(() => {
       })
@@ -106,7 +106,7 @@ export default {
   async addNewSilo(context, payload) {
     const url = `config/silo`
     console.log(payload)
-    api.post(url, payload)
+    return api.post(url, payload)
       .then((response) => {
         console.log(response.statusText)
         if (response.statusText === 'CREATED'){
@@ -114,9 +114,7 @@ export default {
           console.log(payload)
           console.log(`added project: ${payload.id}`)
           context.commit('addNewSiloToList', payload)
-          return true
         }
-        return false
       })
       .catch((error) => {
         console.log(error)

@@ -32,9 +32,11 @@
     "cors": "^2.8.5",
     "fix": "^0.0.6",
     "highlight.js": "^11.8.0",
+    "timers": "^0.1.1",
+    "v-code-diff": "^1.8.0",
     "vue": "^3.2.13",
     "vue-codemirror": "^6.1.1",
-        "vue-codemirror6": "^1.1.27",
+    "vue-codemirror6": "^1.1.27",
     "vue-cookies": "^1.8.3",
     "vue-diff": "^1.2.4",
     "vue-router": "^4.2.2",
@@ -53,8 +55,8 @@
     "eslint-plugin-vue": "^8.0.3",
     "pug": "^3.0.2",
     "pug-plain-loader": "^1.1.0",
-    "vue-pug-plugin": "^2.0.3",
-        "sass-loader": "^13.3.2"
+    "sass-loader": "^13.3.2",
+    "vue-pug-plugin": "^2.0.3"
   },
   "eslintConfig": {
     "root": true,

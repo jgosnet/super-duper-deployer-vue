@@ -29,10 +29,18 @@ v-card.my-0.py-0(class="w-100 mb-0"
         v-divider
         v-row.w-100
           ProjectRules(:rulesList="this.computedRules").w-100
+
+      div(v-if="this.showFiles && this.computedFiles && this.computedFiles.length > 0")
+        v-divider
+        v-row.w-100
+          ProjectFiles(:files="this.computedFiles").w-100
+
       v-divider
       v-card-text(height="50%")
         v-row(v-for="subFolder in localFolders" :key="dir_name + subFolder.name" :folder="subFolder")
-          ProjectFolder.ml-10(:dir_name="subFolder.dir_name"
+          ProjectFolder.ml-10(@update-files="updateFiles"
+            :show-files="this.showFiles"
+            :dir_name="subFolder.dir_name"
             :projectId="this.projectId"
             :folders="subFolder.folders"
             :files="subFolder.files"
@@ -49,14 +57,16 @@ import ProjectPresets from "@/components/PushToRally/PushFolder/ProjectPresets";
 import {mapGetters} from "vuex";
 import {api} from "@/scripts/axios_config";
 import ProjectRules from "@/components/PushToRally/PushFolder/ProjectRules";
+import ProjectFiles from "@/components/PushToRally/PushFolder/Other/ProjectFiles";
 
 export default {
   name: "ProjectFolder",
-  components: {ProjectRules, ProjectPresets},
+  components: {ProjectRules, ProjectPresets, ProjectFiles},
   computed:{
     ...mapGetters('siloConfiguration', ['selectedSiloNames']),
     computedPresets(){
       console.log(`computed presets: ${this.files}`)
+      console.log(this.files)
       if (this.files == undefined){
         return []
       }
@@ -78,6 +88,7 @@ export default {
     }
   },
   props: {
+    showFiles: Boolean,
     show: Boolean,
     showAll: Boolean,
     folders: Array,
@@ -94,6 +105,16 @@ export default {
     }
   },
   methods: {
+    updateFiles(value){
+      console.log(`updating files!`);
+      for (const folder of this.localFolders){
+        console.log(`checking: ${folder.dir_name} vs ${value.dir_name}`)
+        if (folder.dir_name + '/' === value.dir_name){
+          folder.files = value.files;
+        }
+      }
+
+    },
     toggle_folder() {
       this.localShow = !this.localShow
     },
@@ -109,6 +130,7 @@ export default {
                 console.log(response.data[0].folders)
                 // eslint-disable-next-line vue/no-mutating-props
                 this.localFolders = response.data[0].folders
+                this.$emit('updateFiles', {files: response.data[0].files, dir_name: response.data[0].dir_name })
                 console.log(response)
                 console.log(this.localFolders)
               } else{

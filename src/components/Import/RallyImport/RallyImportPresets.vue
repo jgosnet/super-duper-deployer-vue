@@ -23,17 +23,17 @@ v-card.w-100
   v-row
     //| {{this.selectedSilo}}
     div(v-show="selectedPresets.length > 0").w-100
-      v-row.mb-1.pb-1.pl-3
-        v-col(cols="3")
+      v-row.mb-1.py-0.pl-3
+        v-col(cols="3").py-0
           v-btn(
             prepend-icon="fa-solid fa-file-arrow-down"
             @click="downloadSelection" :disabled="this.selectedImportProjects.length == 0").ml-5 Download selection
           div(v-show="this.selectedImportProjects.length == 0" )
             span.text-red Please select a project first
-        v-col(cols="4")
+        v-col(cols="4").py-0
           v-text-field.pl-3(prepend-icon="fa-solid fa-folder-tree" hide-details
           clearable label="Prefix" v-model="downloadPrefix" density="compact")
-        v-col(cols="4")
+        v-col(cols="4").py-0
           v-select.pl-3.mr-2(density="compact" hide-details
             v-model="selectedImportProjects"
             label="Projects"
@@ -41,9 +41,9 @@ v-card.w-100
             multiple
             :items="selectedProjects"
             item-title="name")
-      v-row.mb-1.pb-1.pl-3
-        v-col(cols="3")
-        v-col(cols="4")
+      v-row.mb-1.py-0.pl-3
+        v-col(cols="3").py-0
+        v-col(cols="4").py-0
           v-checkbox.pl-3(label="Use existing prefix (if available)"
             v-model="useExistingPrefix" density="compact" hide-details)
 
@@ -65,12 +65,25 @@ v-card.w-100
         template(v-for="projectId in this.selectedProjectIds"
           v-slot:[`item.status_${projectId}`]="{ item }")
           div(v-if="item.value[`status_${projectId}`] === 'not found'" ).float-left
-            v-icon(color="red" ) fa-solid fa-square-xmark
+            v-tooltip(activator="parent" location="top")
+              div
+                | Missing from project
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="red" ) fa-solid fa-square-xmark
+
           div(v-else-if="item.value[`status_${projectId}`] === 'different'" ).float-left
-            v-icon(color="orange" ) fa-solid fa-triangle-exclamation
+            v-tooltip(activator="parent" location="top")
+              div
+                | Different
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="orange" ) fa-solid fa-triangle-exclamation
           div(v-else-if="item.value[`status_${projectId}`] === 'duplicate'" ).float-left
-            v-icon(color="orange" ) fa-solid fa-paste
-            //v-icon(color="red" ) fa-solid fa-clone
+            v-tooltip(activator="parent" location="top")
+              div
+                | Duplicates found
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="orange" ) fa-solid fa-paste
+                //v-icon(color="red" ) fa-solid fa-clone
 
           div(v-else-if="item.value[`status_${projectId}`] === 'downloading..'").float-left
             v-progress-circular(indeterminate color="primary" )
@@ -80,7 +93,11 @@ v-card.w-100
             v-icon(color="green" ) fa-solid fa-file-circle-check
 
           div(v-else-if="item.value[`status_${projectId}`] === 'imported'").float-left
-            v-icon(color="blue" ) fa-solid fa-file-import
+            v-tooltip(activator="parent" location="top")
+              div
+                | Imported
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="blue" ) fa-solid fa-file-import
 
           div(v-else-if="item.value[`status_${projectId}`] === 'error'").float-left
             v-tooltip(left)
@@ -89,29 +106,36 @@ v-card.w-100
               span {{item.errorDetails || "unknown error"}}
 
           div(v-else)
-            v-icon(color="blue" ) fa-solid fa-question
+            v-tooltip(activator="parent" location="top")
+              div
+                | Unknown status {{item.value[`status_${projectId}`]}}
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="blue" ) fa-solid fa-question
 
 
 
 
         template(v-for="projectId in this.selectedProjectIds"
           v-slot:[`item.prefix_${projectId}`]="{ item }")
-          div(v-show="item.value[`prefix_${projectId}`].length > 0" )
-            span.pr-2 {{item.value[`prefix_${projectId}`].length}}
-            v-tooltip(left)
-              template(v-slot:activator="{ props }")
-                v-icon(v-bind="props" color="blue") fa-solid fa-folder-tree
-              div
-                div(v-for="linePrefix in item.value[`prefix_${projectId}`]")
-                  | {{linePrefix.path || '/'}}:
-                  b.pl-2 {{linePrefix.status || 'n/a'}}
-                  v-icon(v-if="linePrefix.status == different" color="red") fa-solid fa-file-circle-exclamation
-                  v-icon(v-if="linePrefix.status == same" color="green") fa-solid fa-file-circle-check
-          //template(v-slot:activator="{ props }")
-          //  v-icon(v-bind="props" color="blue")
-          //span test
+          div.float-left
+            div(v-show="item.value[`prefix_${projectId}`].length == 1" )
+              span.pr-2 {{showPrefix(item.value[`prefix_${projectId}`][0])}}
+            div(v-show="item.value[`prefix_${projectId}`].length > 1" )
+              span.pr-2 ({{item.value[`prefix_${projectId}`].length}})
+              v-tooltip(left)
+                template(v-slot:activator="{ props }")
+                  v-icon(v-bind="props" color="blue") fa-solid fa-folder-tree
+                div
+                  div(v-for="linePrefix in item.value[`prefix_${projectId}`]")
+                    | {{linePrefix.path || '/'}}:
+                    b.pl-2 {{linePrefix.status || 'n/a'}}
+                    v-icon(v-if="linePrefix.status == different" color="red") fa-solid fa-file-circle-exclamation
+                    v-icon(v-if="linePrefix.status == same" color="green") fa-solid fa-file-circle-check
+            //template(v-slot:activator="{ props }")
+            //  v-icon(v-bind="props" color="blue")
+            //span test
 
-          //
+            //
 
 
         template(v-slot:item.name="{ item }")
@@ -219,6 +243,12 @@ export default {
     }
   },
   methods: {
+    showPrefix(prefixDict){
+      if (prefixDict !== undefined){
+        return prefixDict.path
+      }
+      return ''
+    },
     getCurrentDate(){
       return new Date().toLocaleString();
     },
@@ -229,7 +259,7 @@ export default {
       this.selectedPresets = [];
       this.isLoading = true;
       // first step: refresh the project
-      this.updateMessage = `refreshing projects..`
+      this.updateMessage = `refreshing projects.. (This can take a while for larger projects)`
       await this.refreshProjects(this.selectedProjectIds);
 
       this.updateMessage = `listing presets - ${this.getCurrentDate()}`
@@ -238,8 +268,6 @@ export default {
       let finished = false
       do {
         const result = await this.getPresetsByUrl(url, this.selectedSilo.id, this.selectedProjectIds)
-        console.log("RESULT")
-        console.log(result)
         if (this.stopLoading && result.links !== undefined && result.links.next !== undefined){
           this.updateMessage = `listing interrupted - ${this.getCurrentDate()}`
           finished = true
@@ -249,13 +277,11 @@ export default {
             result === undefined || result.links === undefined || result.links.next === undefined || result.links.next === ""){
           this.updateMessage = `Complete - ${this.getCurrentDate()}`
           finished = true
-          console.log("no next link")
           this.stopLoading = false
 
         }
         else{
           url = result.links.next
-          console.log(`next url: ${url}`)
         }
       }
       while (finished === false);
@@ -268,23 +294,19 @@ export default {
         await api.get(url)
           .then(() => {
           })
-          .catch((error) => {
-            console.log(error)
+          .catch((
+
+          ) => {
           })
           .finally(() => {
-            console.log(`refresh complete`)
           })
       }
     },
-
     async getPresetsByUrl(url, siloId, projectIds){
       let paramsData = {params: {silo_id: siloId, project_ids: projectIds.join(',')}}
       const response = api.get(url, paramsData)
           .then((response) => {
-            console.log("DATA")
-            console.log(response.data)
             response.data.downloaded.forEach((x) => {
-              console.log(x);
               let newRes = {
                 name: x.name,
                 id: x.id,
@@ -300,19 +322,15 @@ export default {
             });
             return response.data
           })
-          .catch((error) => {
-            console.log(error)
+          .catch(() => {
           })
           .finally(() => {
-            console.log(`${url} is complete`)
           })
       this.presetLoadingPromise = response
       return response
     },
 
     async downloadPresetByProject(item, projectId, prefix) {
-      console.log(`downloading preset ${item.name} for project: ${projectId} (${prefix})`)
-      console.log(item)
       item[`status_${projectId}`] = "downloading.."
 
       const url = `silo/${this.selectedSilo.id}/download/${projectId}/presets/${item.id}`
@@ -337,9 +355,6 @@ export default {
       const currentSelection = this.selectedPresets;
       for (const item of currentSelection){
         for (const project of destinationProjects){
-          console.log(`downloading preset for project: ${project}`)
-          console.log(project)
-          console.log(item)
           let projectPrefix = definedPrefix;
           if (useExistingPrefix && item[project.id].prefixes.length > 0){
             // eslint-disable-next-line no-unused-vars
@@ -360,30 +375,21 @@ export default {
     },
     refreshPresetHeaders(){
       this.headers = this.headers.filter(obj => {
-        console.log(`checking: ${obj.key}`)
         if (!obj.key.startsWith('status_') && !obj.key.startsWith('prefix_')){
           return true;
         }
         const searchedId = obj.key.replaceAll("status_", "");
         if (this.selectedProjectIds.includes(searchedId)){
-          console.log(`value ${searchedId} found in selected projects`)
           return true;
         }
         const searchedIdPrefix = obj.key.replaceAll("prefix_", "");
         if (this.selectedProjectIds.includes(searchedIdPrefix)){
-          console.log(`value ${searchedIdPrefix} found in selected projects`)
           return true;
         }
-        console.log(`field not found, deleting: ${obj.key}`)
         return false;
       });
       // parse every included project id:
       for (const projectItem of this.selectedProjects){
-        console.log('checking if project status is available:')
-        console.log(projectItem)
-        console.log(this.headers)
-        console.log('1TESTING:')
-        console.log(this.headers.filter(obj => obj.key === `status_${projectItem.id}`))
         if (this.headers.filter(obj => obj.key === `status_${projectItem.id}`).length === 0){
           this.headers.push({
             title: `Status (${projectItem.name})`,
@@ -399,9 +405,6 @@ export default {
             align: 'left',
             width: '20px',
           })
-        } else{
-          console.log('project item already included')
-          console.log(projectItem)
         }
       }
     },

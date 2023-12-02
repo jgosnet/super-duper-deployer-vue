@@ -28,7 +28,11 @@ v-dialog(v-model="dialog"
           block
           :disabled="!isFormValid"
           variant="outlined") Create
-
+        div(v-if="isLoading" )
+          v-progress-circular(v-show="isLoading" indeterminate
+              color="primary"
+              model-value="20")
+          span.pl-2 Loading..
 
 </template>
 
@@ -39,6 +43,7 @@ export default {
   name: "NewSiloForm",
   data(){
     return {
+      isLoading: false,
       dialog: false,
       isFormValid: false,
       siloname: "",
@@ -60,15 +65,25 @@ export default {
     ...mapGetters('siloConfiguration', ['selectedSiloNames', 'errorMessage']),
   },
   methods: {
-    submit(){
+    sleep(ms){
+      console.log("sleeping")
+      return new Promise(resolve => setTimeout(resolve, ms))
+    },
+    async submit() {
+      this.isLoading = true;
       console.log(`STATUS OF VALIDATION: ${this.isFormValid}`)
       var payload = {
         name: this.siloname,
         customer: this.customer,
         token: this.token,
         base_url: this.baseUrl,
-      }
-      this.$store.dispatch('siloConfiguration/addNewSilo', payload)
+      };
+      await this.$store.dispatch('siloConfiguration/addNewSilo', payload);
+      // await this.sleep(1000);
+      await this.$store.dispatch('siloConfiguration/loadSilosList', payload);
+      console.log("reloaded silos")
+      this.isLoading = false;
+      this.dialog = false;
     },
     siloNameExists(value){
       for (const silo of this.$store.getters['siloConfiguration/selectedSilos']){

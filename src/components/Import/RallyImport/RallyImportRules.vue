@@ -23,17 +23,17 @@ v-card.w-100
   v-row
     //| {{this.selectedSilo}}
     div(v-show="selectedRules.length > 0").w-100
-      v-row.mb-1.pb-1.pl-3
-        v-col(cols="3")
+      v-row.mb-1.py-0.pl-3
+        v-col(cols="3").py-0
           v-btn(
             prepend-icon="fa-solid fa-file-arrow-down"
             @click="downloadSelection" :disabled="this.selectedImportProjects.length == 0").ml-5 Download selection
           div(v-show="this.selectedImportProjects.length == 0" )
             span.text-red Please select a project first
-        v-col(cols="4")
+        v-col(cols="4").py-0
           v-text-field.pl-3(prepend-icon="fa-solid fa-folder-tree" hide-details
           clearable label="Prefix" v-model="downloadPrefix" density="compact")
-        v-col(cols="4")
+        v-col(cols="4").py-0
           v-select.pl-3.mr-2(density="compact" hide-details
             v-model="selectedImportProjects"
             label="Projects"
@@ -55,7 +55,7 @@ v-card.w-100
         show-select
         v-model:items-per-page="itemsPerPage"
         :headers="headers"
-        :items="presetList"
+        :items="rulesList"
         item-value="id"
         class="elevation-1"
         density="compact"
@@ -65,12 +65,25 @@ v-card.w-100
         template(v-for="projectId in this.selectedProjectIds"
           v-slot:[`item.status_${projectId}`]="{ item }")
           div(v-if="item.value[`status_${projectId}`] === 'not found'" ).float-left
-            v-icon(color="red" ) fa-solid fa-square-xmark
+            v-tooltip(activator="parent" location="top")
+              div
+                | Missing from project
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="red" ) fa-solid fa-square-xmark
+
           div(v-else-if="item.value[`status_${projectId}`] === 'different'" ).float-left
-            v-icon(color="orange" ) fa-solid fa-triangle-exclamation
+            v-tooltip(activator="parent" location="top")
+              div
+                | Different
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="orange" ) fa-solid fa-triangle-exclamation
           div(v-else-if="item.value[`status_${projectId}`] === 'duplicate'" ).float-left
-            v-icon(color="orange" ) fa-solid fa-paste
-            //v-icon(color="red" ) fa-solid fa-clone
+            v-tooltip(activator="parent" location="top")
+              div
+                | Duplicates found
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="orange" ) fa-solid fa-paste
+                //v-icon(color="red" ) fa-solid fa-clone
 
           div(v-else-if="item.value[`status_${projectId}`] === 'downloading..'").float-left
             v-progress-circular(indeterminate color="primary" )
@@ -80,7 +93,11 @@ v-card.w-100
             v-icon(color="green" ) fa-solid fa-file-circle-check
 
           div(v-else-if="item.value[`status_${projectId}`] === 'imported'").float-left
-            v-icon(color="blue" ) fa-solid fa-file-import
+            v-tooltip(activator="parent" location="top")
+              div
+                | Imported
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="blue" ) fa-solid fa-file-import
 
           div(v-else-if="item.value[`status_${projectId}`] === 'error'").float-left
             v-tooltip(left)
@@ -89,27 +106,34 @@ v-card.w-100
               span {{item.errorDetails || "unknown error"}}
 
           div(v-else)
-            v-icon(color="blue" ) fa-solid fa-question
+            v-tooltip(activator="parent" location="top")
+              div
+                | Unknown status {{item.value[`status_${projectId}`]}}
+              template(v-slot:activator="{ on, attrs }")
+                v-icon(color="blue" ) fa-solid fa-question
 
 
 
 
         template(v-for="projectId in this.selectedProjectIds"
           v-slot:[`item.prefix_${projectId}`]="{ item }")
-          div(v-show="item.value[`prefix_${projectId}`].length > 0" )
-            span.pr-2 {{item.value[`prefix_${projectId}`].length}}
-            v-tooltip(left)
-              template(v-slot:activator="{ props }")
-                v-icon(v-bind="props" color="blue") fa-solid fa-folder-tree
-              div
-                div(v-for="linePrefix in item.value[`prefix_${projectId}`]")
-                  | {{linePrefix.path || '/'}}:
-                  b.pl-2 {{linePrefix.status || 'n/a'}}
-                  v-icon(v-if="linePrefix.status == different" color="red") fa-solid fa-file-circle-exclamation
-                  v-icon(v-if="linePrefix.status == same" color="green") fa-solid fa-file-circle-check
-          //template(v-slot:activator="{ props }")
-          //  v-icon(v-bind="props" color="blue")
-          //span test
+          div.float-left
+            div(v-show="item.value[`prefix_${projectId}`].length == 1" )
+              span.pr-2 {{showPrefix(item.value[`prefix_${projectId}`][0])}}
+            div(v-show="item.value[`prefix_${projectId}`].length > 1" )
+              span.pr-2 ({{item.value[`prefix_${projectId}`].length}})
+              v-tooltip(left)
+                template(v-slot:activator="{ props }")
+                  v-icon(v-bind="props" color="blue") fa-solid fa-folder-tree
+                div
+                  div(v-for="linePrefix in item.value[`prefix_${projectId}`]")
+                    | {{linePrefix.path || '/'}}:
+                    b.pl-2 {{linePrefix.status || 'n/a'}}
+                    v-icon(v-if="linePrefix.status == different" color="red") fa-solid fa-file-circle-exclamation
+                    v-icon(v-if="linePrefix.status == same" color="green") fa-solid fa-file-circle-check
+            //template(v-slot:activator="{ props }")
+            //  v-icon(v-bind="props" color="blue")
+            //span test
 
           //
 
@@ -140,12 +164,12 @@ export default {
       selectedImportProjects: [],
       downloadPrefix: "",
       selectedRules: [],
-      presetInSiloClass: [],
+      ruleInSiloClass: [],
       itemsPerPage: 10,
       isLoading: false,
       updateMessage: "Not loaded yet.",
       search: '',
-      presetList: [
+      rulesList: [
         // {"name": "test", "id": 1, 'provider_type': "Decision Engine", "status": "complete"},
         // {"name": "test", "id": 1, 'provider_type': "Decision Engine", "status": "complete"},
         // {"name": "test", "id": 1, 'provider_type': "Decision Engine", "status": "downloading.."},
@@ -215,21 +239,27 @@ export default {
       console.log(`Project selection changed: old -> ${oldValue}`);
       this.refreshPresetHeaders();
       this.updateMessage = `Project list changed - ${this.getCurrentDate()}`;
-      this.presetList = [];
+      this.rulesList = [];
     }
   },
   methods: {
+        showPrefix(prefixDict){
+      if (prefixDict !== undefined){
+        return prefixDict.path
+      }
+      return ''
+    },
     getCurrentDate(){
       return new Date().toLocaleString();
     },
     async loadRules() {
 
-      this.presetList = [];
+      this.rulesList = [];
       this.stopLoading = false
       this.selectedRules = [];
       this.isLoading = true;
       // first step: refresh the project
-      this.updateMessage = `refreshing projects..`
+      this.updateMessage = `refreshing projects.. (This can take a while for larger projects)`
       await this.refreshProjects(this.selectedProjectIds);
 
       this.updateMessage = `listing rules - ${this.getCurrentDate()}`
@@ -276,7 +306,6 @@ export default {
           })
       }
     },
-
     async getRulesByUrl(url, siloId, projectIds){
       let paramsData = {params: {silo_id: siloId, project_ids: projectIds.join(',')}}
       const response = api.get(url, paramsData)
@@ -296,7 +325,7 @@ export default {
                 newRes[`prefix_${projectItem.id}`] = x.projects_data[projectItem.id].prefixes
                 newRes[`status_${projectItem.id}`] = x.projects_data[projectItem.id].status
               }
-              this.presetList.push(newRes);
+              this.rulesList.push(newRes);
             });
             return response.data
           })

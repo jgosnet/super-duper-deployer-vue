@@ -1,8 +1,9 @@
 <template lang="pug">
 v-container(class="mx-1" fluid).preset.ml-5
-  //| {{selectedSilos}}
+  v-icon.pt-3.float-right(@click="this.showContainer = !this.showContainer" size="large" ) {{showContainerIcon}}
   v-row.mx-4.my-1
-    h2.py-2.px-3.float-left(align="left") Presets
+    h3.py-2.px-3.float-left(align="left" @click="this.showContainer = !this.showContainer") Presets
+    span.py-2.pr-5 {{this.presetsCount}}
     v-btn.float-right(@click="refreshPresets()" size="x-small" icon="fa-solid fa-arrows-rotate")
     div(v-if="this.selectedPresets.length > 0" )
       v-btn.ml-3(prepend-icon="fa-solid fa-file-arrow-down" @click="uploadDialog = true"
@@ -27,31 +28,34 @@ v-container(class="mx-1" fluid).preset.ml-5
             v-btn(color="primary" @click="uploadDialog = false") Cancel
             v-btn(color="primary"  @click="uploadSelection") Confirm
   v-row
-  v-data-table(
+
+  v-data-table(v-show="this.showContainer"
     v-model:items-per-page="itemsPerPage"
     v-model="selectedPresets"
     :headers="presetHeaders"
     :items="localPresetsList"
     item-value="name"
-    class="elevation-1"
+    class="elevation-1 test"
     density="compact"
     :item-class="presetInSiloClass"
     color="grey-lighten-4"
     show-select
     return-object
   )
+
     template(v-slot:item.existsInSilo="{ item }")
       div.float-left
-        //| --{{item}}--
         v-icon(v-if="item.existsInSilo === undefined" ) fa-solid fa-question
         v-icon(v-else-if="!item.existsInSilo" ) fa-solid fa-xmark
         v-icon(v-else) fa-solid fa-check
 
     template(v-slot:item.name="{ item }")
       div.float-left
+        ProjectPresetDetails.pr-2(:presetDetails="item.value")
         //v-icon(color="blue" class="pr-4") fa-solid fa-circle-info
-        ProjectPresetDetails.float-left.pr-2(:presetDetails="item.value" )
+        //ProjectPresetDetails.float-left.pr-2(:presetDetails="item.value" )
         | {{item.value.name }}
+
 
 
     template(v-for="selectedSilo in this.selectedSilos"
@@ -60,15 +64,23 @@ v-container(class="mx-1" fluid).preset.ml-5
         v-progress-circular(indeterminate color="blue" size="small" )
         //v-icon(icon="fa-solid fa-spinner" color="blue" )
       div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'complete' || item.value[`status_${selectedSilo.id}`] === 'same'" )
-        v-icon(icon="fa-solid fa-square-check" color="green" )
+        //| {{item.value}}
+        v-icon(color="green" icon="fa-solid fa-square-check"
+          @click.prevent="openPresetDetails(item.value, selectedSilo.id)")
+        //ProjectPresetDetails.pr-2(:presetDetails="item.value"
+        //      icon="fa-solid fa-square-check" color="green")
       div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'duplicate'" )
-        v-icon(icon="fa-solid fa-paste" color="red" )
+        v-icon(icon="fa-solid fa-paste" color="red"
+          @click.prevent="openPresetDetails(item.value)")
       div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'updated'" )
         v-icon(icon="fa-solid fa-file-export" color="blue" )
       div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'error'" )
         v-tooltip(activator="parent" location="top") Failed to push
           template(v-slot:activator="{ on, attrs }")
-            v-icon(icon="fa-solid fa-circle-exclamation" color="red" )
+            v-icon(icon="fa-solid fa-circle-exclamation" color="red"
+              @click.prevent="openPresetDetails(item.value, selectedSilo.id)")
+            //ProjectPresetDetails.pr-2(:presetDetails="item.value"
+            //  )
 
       div(v-else-if="item.value[`status_${selectedSilo.id}`] === 'different'" )
         //| -{{item.value[`silo_${selectedSilo.id}`]}}-
@@ -83,7 +95,10 @@ v-container(class="mx-1" fluid).preset.ml-5
             v-icon(v-if="!item.value[`silo_${selectedSilo.id}`].config_data_diff" icon="fa-solid fa-square-check" color="green" )
             v-icon(v-else icon="fa-solid fa-triangle-exclamation" color="red" )
           template(v-slot:activator="{ on, attrs }")
-            v-icon(icon="fa-solid fa-triangle-exclamation" color="orange" )
+            //ProjectPresetDetails.pr-2(:presetDetails="item.value"
+            //  icon="fa-solid fa-triangle-exclamation" color="orange")
+            v-icon(icon="fa-solid fa-triangle-exclamation" color="orange"
+              @click.prevent="openPresetDetails(item.value, selectedSilo.id)")
 
       div(v-else)
         //| --{{item.value[`status_${selectedSilo.id}`]}}--
@@ -118,6 +133,18 @@ export default {
     ...mapGetters('siloConfiguration', ['selectedSilos', 'preSelectedSilos']),
     formattedSiloSelection(){
       return `[${this.preSelectedSilos.join(", ")}]`
+    },
+    showContainerIcon(){
+      if (this.showContainer){
+        return "fa-solid fa-caret-right"
+      }
+      return "fa-solid fa-caret-down"
+    },
+    presetsCount(){
+      if (this.showContainer){
+        return ""
+      }
+      return `(${this.presetsList.length})`
     }
   },
   props: {
@@ -125,15 +152,17 @@ export default {
   },
   data() {
     return {
+      showContainer: true,
       uploadDialog: false,
       selectedPresets: [],
       itemsPerPage: 5,
       baseHeaders: [
-          {
+        {
           title: 'name',
           align: 'start',
           sortable: false,
-          key: 'name'
+          key: 'name',
+          class: "blue lighten-5"
         },
         {
           title: 'id',
@@ -150,9 +179,20 @@ export default {
     selectedSilos(newValue, oldValue){
       console.log(`Silo selection changed: old -> ${oldValue}`);
       this.refreshPresetHeaders();
-    }
+    },
+    presetsList(newValue, oldValue){
+      console.log(`presetsList changed: old -> ${oldValue}`);
+      this.refreshPresets();
+    },
   },
   methods: {
+    closePresetDetails(item){
+      item['modal'] = false;
+    },
+    openPresetDetails(item, silo_name){
+        item['modal'] = true;
+        item.selectedSilo = silo_name;
+    },
     async uploadSelection(){
       // set the parameters
       const currentSelection = this.selectedPresets;
@@ -336,11 +376,16 @@ export default {
   margin-top: 14px;
   margin-bottom: 14px;
 
-  background-color: #F8F9F9;
+  background-color: #e6f2ff;
   border-style: dashed;
-  border-width: 2px;
+  border-width: 1px;
   border-radius: 5px;
   color: darkslategrey;
 }
+
+.v-table{
+    background-color: #e6faff;
+}
+
 
 </style>

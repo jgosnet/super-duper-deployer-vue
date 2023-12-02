@@ -46,6 +46,8 @@ const vuetify = createVuetify({
 import {router} from "@/router"
 import { basicSetup } from 'codemirror'
 import VueCodemirror from 'vue-codemirror'
+import CodeDiff from 'v-code-diff'
+
 
 export const Vue = createApp(App)
   .use(vuetify)
@@ -62,6 +64,7 @@ export const Vue = createApp(App)
   .use(VueDiff, {
     componentName: 'Diff',
   })
+  .use(CodeDiff)
   .mount('#app')
 
 
