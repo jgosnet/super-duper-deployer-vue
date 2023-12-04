@@ -22,7 +22,7 @@ v-timeline-item(icon="fa-solid fa-indent"
 
 <script>
 export default {
-  name: "MicroSiloDetailsTestAssets",
+  name: "PilotSiloDetailsTestAssets",
   props:{
     silo: Object
   },

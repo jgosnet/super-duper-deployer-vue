@@ -14,14 +14,15 @@ v-timeline-item(icon="fa-solid fa-indent"
       v-icon fa-solid fa-indent
   v-card(elevation="3" )
     v-card-title
-      b  Presets
+      b  Rules
     v-card-text
-      p Click for more details
+       p Click for more details
+
 </template>
 
 <script>
 export default {
-  name: "MicroSiloDetailsPresets",
+  name: "PilotSiloDetailsRules",
   props:{
     silo: Object
   },

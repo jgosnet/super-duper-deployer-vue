@@ -5,7 +5,7 @@ import CompareHome from "@/components/Compare/CompareHome";
 import UserAuth from "@/components/Login/UserAuth";
 import {createRouter, createWebHistory} from "vue-router";
 import {store} from "@/store/store";
-import MicroSiloHome from "@/components/MicroSilo/MicroSiloHome";
+import PilotSiloHome from "@/components/PilotSilo/PilotSiloHome";
 
 export const routes = [
   {
@@ -32,8 +32,8 @@ export const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/microsilo',
-    component: MicroSiloHome,
+    path: '/pilot',
+    component: PilotSiloHome,
     meta: { requiresAuth: true }
   }
 ]

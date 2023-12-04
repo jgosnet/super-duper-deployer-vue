@@ -19,7 +19,7 @@ v-timeline-item(icon="fa-solid fa-list-check"
 
 <script>
 export default {
-  name: "MicroSiloDetailsRsl",
+  name: "PilotSiloDetailsRsl",
   props:{
     silo: Object
   },
