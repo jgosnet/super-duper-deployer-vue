@@ -19,4 +19,4 @@ COPY . .
 RUN npm run build
 
 EXPOSE 8081
-CMD [ "serve", "-s", "dist", "--port", "8081"]
+CMD [ "serve", "-s", "dist", "-p", "8081"]
