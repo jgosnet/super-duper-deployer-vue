@@ -15,7 +15,7 @@ v-container(fluid )
             exact-active-class='grey' large)
             v-list-item-title.item-title {{item.title}}
 
-      v-toolbar-title Super Duper Deploy Tool
+      v-toolbar-title Super Duper Deploy Tool v2
       //v-spacer
       i.pr-4 10/04/2023
       v-btn.mr-2(link to="login" v-show="!isLoggedIn" ) login
