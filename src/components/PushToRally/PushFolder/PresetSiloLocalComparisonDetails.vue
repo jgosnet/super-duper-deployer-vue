@@ -9,7 +9,8 @@ v-window(v-model="selectedTab" ).w-100
   div.py-2
     i Last modified date:
     b.pl-2 {{ remoteDate }}
-    v-checkbox.float-right.pl-3(label="Show differences"
+    v-checkbox.float-right.pl-3(v-show="isDifferent"
+            label="Show differences"
             v-model="showDiff" density="compact" hide-details)
   v-window-item(value="providerdata" ).w-100
     //| {{this.presetDetails.remote.config_data}}
@@ -21,20 +22,21 @@ v-window(v-model="selectedTab" ).w-100
               :new-string="remoteCode"
               output-format="side-by-side"
       )
-    code-mirror.w-100.CodeMirror(v-else
-    v-model="remoteCode"
-      basic
-      :lang="lang"
-    )
+    div(v-else)
+      codemirror.w-100.CodeMirror(
+        v-model="remoteCode"
+          basic
+          :lang="lang"
+        )
   v-window-item(value="rallyconfig" ).w-100
-    code-mirror.w-100.CodeMirror(v-model="remoteRallyConfig"
+    codemirror.w-100.CodeMirror(v-model="remoteRallyConfig"
       basic
       :lang="lang"
     )
 </template>
 
 <script>
-import CodeMirror from 'vue-codemirror6';
+import CodeMirror from 'vue-codemirror';
 import {python} from "@codemirror/lang-python";
 import {mapGetters} from "vuex";
 
@@ -65,6 +67,7 @@ export default {
   },
   props:{
     presetDetails: Object,
+    isDifferent: Boolean
   },
   data() {
     return {

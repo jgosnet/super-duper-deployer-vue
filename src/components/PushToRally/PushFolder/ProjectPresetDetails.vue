@@ -29,7 +29,8 @@ div.w-100
             div(v-for="silo in selectedSilos" :key="silo.name"  )
               v-window-item(:value="silo.id")
                 //| {{presetDetails[`silo_${silo.id}`]}}
-                PresetSiloLocalComparisonDetails(:preset-details="presetDetails[`silo_${silo.id}`]" ).w-100
+                PresetSiloLocalComparisonDetails(:preset-details="presetDetails[`silo_${silo.id}`]"
+                  :is-different="presetDetails[`status_${silo.id}`] != 'same'").w-100
                 //| ***{{presetDetails[`silo_${silo.id}`]}}***
                 //CodeMirror.CodeMirror.py-3.w-100(v-model="presetDetails[`silo_${silo.id}`].local.preset_data"
                 //  :lang="lang"
@@ -42,7 +43,7 @@ div.w-100
 </template>
 
 <script>
-import CodeMirror from 'vue-codemirror6';
+import CodeMirror from 'vue-codemirror';
 import {python} from "@codemirror/lang-python";
 import {mapGetters} from "vuex";
 import PresetSiloLocalComparisonDetails from "@/components/PushToRally/PushFolder/PresetSiloLocalComparisonDetails";

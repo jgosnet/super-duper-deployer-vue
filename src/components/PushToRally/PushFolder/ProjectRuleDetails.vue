@@ -42,7 +42,7 @@ div.w-100
 </template>
 
 <script>
-import CodeMirror from "vue-codemirror6";
+import CodeMirror from "vue-codemirror";
 import {python} from "@codemirror/lang-python";
 import {mapGetters} from "vuex";
 
